@@ -12,7 +12,7 @@ const root = ReactDOM.createRoot(
 );
 root.render(
   <React.StrictMode>
-    <Header></Header>
+    <Header/>
     <App />
     <Footer />
   </React.StrictMode>

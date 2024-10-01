@@ -29,7 +29,7 @@ export default function Header() {
     >
       <nav
         aria-label="Global"
-        className="mx-auto flex max-w-7xl items-center justify-between px-3 lg:px-8"
+        className="mx-auto flex max-w-8xl items-center justify-between px-3 lg:px-8"
       >
         {/* Logo */}
         <div className="flex lg:flex-1">
