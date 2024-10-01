@@ -35,7 +35,7 @@ export default function Header() {
         <div className="flex lg:flex-1">
           <a href="#" className="-m-1 p-1">
             <span className="sr-only">Your Company</span>
-            <img alt="360 Logo" src={logo} className="h-20 w-auto" />
+            <img alt="360 Logo" src={logo} className="h-12 w-auto lg:h-20" />
           </a>
         </div>
 
@@ -47,7 +47,7 @@ export default function Header() {
             className="-m-2.5 inline-flex items-center justify-center rounded-md p-2.5 text-gray-700"
           >
             <span className="sr-only">Open main menu</span>
-            <Bars3Icon aria-hidden="true" className="h-6 w-6" />
+            <Bars3Icon aria-hidden="true" className="h-5 w-5" />
           </button>
         </div>
 
