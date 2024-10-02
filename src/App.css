@@ -36,3 +36,11 @@
     transform: rotate(360deg);
   }
 }
+
+.section-title {
+  color: white;
+  padding: 20px;
+  font-weight: 600;
+  font-size: x-large;
+  font-family:Verdana, Geneva, Tahoma, sans-serif 
+}
