@@ -9,10 +9,10 @@ function App() {
   return (
     <div className="App">
       <MainView />
-      <section id="about">
+      <section id="about" className="p-10">
         <AboutUs />
       </section>
-      <section id="projects">
+      <section id="projects" className="p-10">
         <OurProjects />
       </section>
       <section id="contact">

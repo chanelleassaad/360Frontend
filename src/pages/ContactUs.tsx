@@ -39,10 +39,8 @@ export default function ContactUs() {
       <div className="flex border-section mx-auto grid  grid-cols-1 gap-x-8 sm:gap-y-20 lg:mx-0 lg:max-w-none md:grid-cols-2">
         <div className="flex-1 lg:pr-8 lg:pt-4">
           <div className="lg:max-w-lg">
-            <p className="mt-2 text-3xl font-bold tracking-tight text-white sm:text-4xl">
-              Contact Us
-            </p>
-            <dl className="mt-10 max-w-xl space-y-8 text-base leading-7 lg:max-w-none display-center pl-2 p-10">
+            <p className="section-title">CONTACT US</p>
+            <dl className="mt-10 max-w-xl space-y-8 text-base leading-7 lg:max-w-none display-center pl-2 px-10">
               {features.map((feature) => (
                 <div key={feature.name} className="relative pl-9">
                   <dt className="flex justify-between font-semibold text-white">

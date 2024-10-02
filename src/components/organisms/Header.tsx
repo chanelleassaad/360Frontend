@@ -15,7 +15,7 @@ export default function Header() {
   const handleNavigation = (id: string) => {
     const element = document.getElementById(id);
     if (element) {
-      const offset = element.offsetTop - 100;
+      const offset = element.offsetTop - 50;
       window.scrollTo({ behavior: "smooth", top: offset });
       setMobileMenuOpen(false); // Close the mobile menu if it's open
     }

@@ -1,4 +1,5 @@
 import { useState } from "react";
+import colors from "../../colors";
 
 interface PartnerCardProps {
   name: string;
@@ -55,7 +56,7 @@ function PartnerCard({
             className="absolute w-full h-full flex items-center justify-center text-white"
             style={{
               backfaceVisibility: "hidden",
-              backgroundColor: "#323a45",
+              backgroundColor: colors.grey,
               transform: "rotateY(180deg)",
               padding: "20px",
               overflow: "hidden",

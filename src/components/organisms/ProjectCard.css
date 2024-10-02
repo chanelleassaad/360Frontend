@@ -48,7 +48,7 @@
 }
 
 .card-header {
-    background-color: #f01632;
+    background-color: var(--color-red);
     width: 100%;
     border-top-left-radius: 10px;
     border-top-right-radius: 10px;
@@ -63,7 +63,7 @@
 }
 
 .card-footer {
-    background-color: #f01632;
+    background-color: var(--color-red);
     width: 100%;
     border-bottom-left-radius: 10px;
     border-bottom-right-radius: 10px;

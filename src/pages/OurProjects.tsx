@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import "./OurProjects.css";
 import ProjectCard from "../components/organisms/ProjectCard";
+import Stats from "../components/organisms/Stats";
 
 const projects = [
   {
@@ -101,6 +102,7 @@ function OurProjects() {
           ›
         </button>
       </div>
+      <Stats />
     </>
   );
 }
