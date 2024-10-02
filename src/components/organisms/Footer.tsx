@@ -18,14 +18,7 @@ function Footer() {
         <FaLinkedin className={media_style} />
       </a>
     </div>
-  
-    <div className="flex flex-col sm:flex-row justify-center items-center mt-4">
-      <FaEnvelope className={contact_style} />
-      360Company@gmail.com
-      <div className="m-[10px]"></div>
-      <FaPhone className={contact_style} />
-      +961-78800900
-    </div>
+    
   </div>
 
 
