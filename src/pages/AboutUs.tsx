@@ -16,6 +16,12 @@ function AboutUs() {
       description: "Don't Deliver a Product, Deliver Experience.",
       details: "",
     },
+    {
+      name: "Joseph Hannouch",
+      imageUrl: profile1, // Replace with actual image URL
+      description: "Don't Deliver a Product, Deliver Experience.",
+      details: "",
+    },
   ];
 
   return (

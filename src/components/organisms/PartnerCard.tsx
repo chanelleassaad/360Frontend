@@ -1,5 +1,6 @@
 import { useState } from "react";
 import colors from "../../colors";
+import { GiClick } from "react-icons/gi";
 
 interface PartnerCardProps {
   name: string;
@@ -49,6 +50,7 @@ function PartnerCard({
               alt={`${name}'s profile`}
               className="h-full w-full object-cover rounded"
             />
+            <GiClick className="absolute top-2 right-2 text-xl" />
           </div>
 
           {/* Back side (Text) */}
