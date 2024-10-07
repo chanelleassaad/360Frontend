@@ -30,23 +30,6 @@
     transform: translateX(100%) scale(0.7);
 }
 
-.left-arrow, .right-arrow {
-    position: absolute;
-    top: 50%;
-    background: none;
-    border: none;
-    font-size: 2rem;
-    cursor: pointer;
-    z-index: 3  ;
-    color: white;
-}
-.left-arrow {
-    left: 10px;
- }
-.right-arrow {
-    right: 10px;
-}
-
 .card-header {
     background-color: var(--color-red);
     width: 100%;

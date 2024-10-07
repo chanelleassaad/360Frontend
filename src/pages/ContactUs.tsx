@@ -53,7 +53,7 @@ export default function ContactUs() {
           </div>
           <div className="flex justify-center">
             <img
-              className="pt-10 h-15 hidden md:block"
+              className="pt-10 h-15 hidden md:block h-80"
               src={image}
               alt=""
             ></img>
