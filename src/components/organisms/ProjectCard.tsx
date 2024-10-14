@@ -1,11 +1,13 @@
+import { IProject } from "../../interfaces/IProject";
 import "./ProjectCard.css";
 
-interface ProjectCardProps {
-  project: any;
+interface IProjectCardProps {
+  project: IProject;
   isActive: boolean;
   isLeft: boolean;
   isRight: boolean;
   activeImageIndex: number;
+  onVideoClick: (project: IProject) => void;
 }
 
 const ProjectCard = ({
@@ -14,7 +16,8 @@ const ProjectCard = ({
   isLeft,
   isRight,
   activeImageIndex,
-}: ProjectCardProps) => {
+  onVideoClick,
+}: IProjectCardProps) => {
   let className = "card";
   if (isActive) {
     className += " active";
@@ -24,11 +27,18 @@ const ProjectCard = ({
     className += " right";
   }
 
+  const handleVideoClick = () => {
+    onVideoClick(project); // Call the function passed from App
+  };
+
   return (
     <div className={className}>
       <div className="card-header">
         <h1>{project.title}</h1>
-        <h2>{project.location}</h2>
+        <div className="flex justify-between">
+          <h2>{project.location}</h2>
+          <h2>{project.year}</h2>
+        </div>
       </div>
       {isActive ? (
         <div className="slideshow-container">
@@ -37,13 +47,21 @@ const ProjectCard = ({
             alt={project.title}
             className="slideshow-image"
           />
+          {/* Video icon in bottom-right corner */}
+          {project.video && (
+            <div className="video-icon" onClick={handleVideoClick}>
+              🎥
+            </div>
+          )}
         </div>
       ) : (
-        <img
-          src={project.images[0]}
-          alt={project.title}
-          className="static-image"
-        />
+        <div className="image-container">
+          <img
+            src={project.images[0]}
+            alt={project.title}
+            className="static-image"
+          />
+        </div>
       )}
 
       <div className="card-footer">{project.description}</div>

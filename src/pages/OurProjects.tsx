@@ -4,7 +4,7 @@ import Stats from "../components/organisms/Stats";
 import { IProject } from "../interfaces/IProject";
 import { getProjects } from "../api/ProjectsApi";
 
-function OurProjects() {
+function OurProjects({ onVideoClick }: any) {
   const [projects, setProjects] = useState<IProject[]>([]);
   const [current, setCurrent] = useState(0); // Start with the first project
   const [activeImageIndex, setActiveImageIndex] = useState(0);
@@ -50,7 +50,7 @@ function OurProjects() {
   return (
     <>
       <h1 className="section-title">OUR PROJECTS</h1>
-      <div className="relative w-full max-w-[1200px] mx-auto overflow-hidden">
+      <div className="relative w-full mx-auto overflow-hidden">
         <div className="flex justify-center items-center h-[450px]">
           {projects.map((project, index) => (
             <ProjectCard
@@ -62,17 +62,18 @@ function OurProjects() {
               }
               isRight={index === (current + 1) % projects.length}
               activeImageIndex={activeImageIndex}
+              onVideoClick={onVideoClick}
             />
           ))}
         </div>
         <button
-          className="absolute top-1/2 left-4 transform -translate-y-1/2 bg-transparent border-none text-2xl cursor-pointer text-white z-10"
+          className="absolute top-1/2 left-0 transform -translate-y-1/2 bg-transparent border-none text-2xl cursor-pointer text-white z-10 "
           onClick={handlePrev}
         >
           ‹
         </button>
         <button
-          className="absolute top-1/2 right-4 transform -translate-y-1/2 bg-transparent border-none text-2xl cursor-pointer text-white z-10"
+          className="absolute top-1/2 right-0 transform -translate-y-1/2 bg-transparent border-none text-2xl cursor-pointer text-white z-10"
           onClick={handleNext}
         >
           ›
