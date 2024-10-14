@@ -1,20 +1,29 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
+import { BrowserRouter as Router, Route, Routes, Navigate } from "react-router-dom";
 import "./index.css";
 import App from "./App";
 import Footer from "./components/organisms/Footer";
 import reportWebVitals from "./reportWebVitals";
 import "./styles.css";
 import Header from "./components/organisms/Header";
+import Login from "./pages/login";
 
 const root = ReactDOM.createRoot(
   document.getElementById("root") as HTMLElement
 );
+
 root.render(
   <React.StrictMode>
-    <Header/>
-    <App />
-    <Footer />
+    <Router>
+      <Header />
+      <Routes>
+        <Route path="/*" element={<App />} />
+        <Route path="/admin" element={<Login />} />
+        <Route path="/admin" element={<Navigate to="/admin" replace />} />
+      </Routes>
+      <Footer />
+    </Router>
   </React.StrictMode>
 );
 
