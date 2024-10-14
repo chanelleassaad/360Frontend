@@ -4,6 +4,8 @@ import MainView from "./pages/MainView";
 import AboutUs from "./pages/AboutUs";
 import OurProjects from "./pages/OurProjects";
 import ContactUs from "./pages/ContactUs";
+import Footer from "./components/organisms/Footer";
+import Header from "./components/organisms/Header";
 import ProjectVideoModal from "./components/template/ProjectVideoModal";
 import { useState } from "react";
 
@@ -21,6 +23,7 @@ function App() {
   };
   return (
     <>
+      <Header />
       <div className="App">
         <MainView />
         <section id="about" className="p-10">
@@ -33,6 +36,7 @@ function App() {
           <ContactUs />
         </section>
       </div>
+      <Footer />
       {isModalOpen && (
         <ProjectVideoModal
           project={activeProject}

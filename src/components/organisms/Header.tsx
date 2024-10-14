@@ -1,9 +1,16 @@
-import { useState } from "react";
+import { useState, useContext } from "react";
 import { Dialog, DialogPanel } from "@headlessui/react";
 import { Bars3Icon, XMarkIcon } from "@heroicons/react/24/outline";
 import logo from "../../assets/360logo.png";
 
+// Assuming you have an AuthContext to provide the user's authentication status
+import { useAuth } from "../../store/authentication/AuthContext";
+import { useSelector } from "react-redux";
+
 export default function Header() {
+  const { signOut } = useAuth(); // Use your AuthContext to get login status and logout function
+  const { userToken } = useSelector((state: any) => state.auth);
+
   const sections = [
     { id: "about", name: "About Us" },
     { id: "projects", name: "Our Projects" },
@@ -62,6 +69,15 @@ export default function Header() {
               {section.name}
             </button>
           ))}
+          {/* Logout Button */}
+          {userToken && (
+            <button
+              onClick={signOut}
+              className="text-sm font-semibold leading-6 text-gray-900"
+            >
+              Logout
+            </button>
+          )}
         </div>
       </nav>
 
@@ -72,7 +88,7 @@ export default function Header() {
         className="lg:hidden"
       >
         <div className="fixed inset-0 z-10 bg-black opacity-30" />
-        <DialogPanel className="fixed inset-y-0 right-0 z-10 w-full overflow-y-auto bg-white px-3  sm:max-w-sm sm:ring-1 sm:ring-gray-900/10">
+        <DialogPanel className="fixed inset-y-0 right-0 z-10 w-full overflow-y-auto bg-white px-3 sm:max-w-sm sm:ring-1 sm:ring-gray-900/10">
           <div className="flex items-center justify-between">
             <a href="#" className="-m-1.5 p-1.5">
               <span className="sr-only">Your Company</span>
@@ -98,6 +114,15 @@ export default function Header() {
                 {section.name}
               </button>
             ))}
+            {/* Mobile Logout Button */}
+            {userToken && (
+              <button
+                onClick={signOut}
+                className="-mx-3 block rounded-lg px-3 py-2 text-base font-semibold leading-7 text-gray-900 hover:bg-gray-50"
+              >
+                Logout
+              </button>
+            )}
           </div>
         </DialogPanel>
       </Dialog>
