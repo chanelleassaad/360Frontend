@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import ProjectCard from "../components/organisms/ProjectCard";
-import Stats from "../components/organisms/Stats";
+import Stats from "../components/template/Stats";
 import { IProject } from "../interfaces/IProject";
 import { getProjects } from "../api/ProjectsApi";
 

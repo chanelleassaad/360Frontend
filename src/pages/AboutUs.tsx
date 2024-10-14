@@ -32,8 +32,8 @@ function AboutUs() {
   const [text, setText] = useState(
     "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean commodo ligula eget dolor. Aenean massa. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Donec quam felis, ultricies nec, pellentesque eu, pretium quis, sem. Nulla consequat massa quis enim. Donec pede justo, fringilla vel, aliquet nec, vulputate eget, arcu."
   );
-  const [canEdit, setCanEdit] = useState(false);
 
+  const [canEdit, setCanEdit] = useState(false);
   const { userToken } = useSelector((state: any) => state.auth);
 
   const handleEditClickText = () => {

@@ -1,5 +1,6 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import colors from "../../colors";
+import { useSelector } from "react-redux";
 
 // Define the Stat type
 interface Stat {
@@ -18,6 +19,9 @@ export default function Stats() {
   const [stats, setStats] = useState<Stat[]>(initialStats);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingStats, setEditingStats] = useState<Stat[]>([...initialStats]);
+
+  const [canEdit, setCanEdit] = useState(false);
+  const { userToken } = useSelector((state: any) => state.auth);
 
   const handleEditClick = () => {
     setEditingStats([...stats]); // Prepare stats for editing
@@ -50,18 +54,27 @@ export default function Stats() {
     );
   };
 
+  useEffect(() => {
+    if (userToken) setCanEdit(true);
+    else setCanEdit(false);
+    console.log(userToken);
+  }, [userToken]);
+
   return (
     <div className="my-10 lg:py-10">
       <div className="mx-auto max-w-7xl px-6 lg:px-8">
         {/* Edit Button */}
-        <div className="flex justify-end mb-4">
-          <button
-            className="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded"
-            onClick={handleEditClick}
-          >
-            Edit Stats
-          </button>
-        </div>
+        {canEdit && (
+          <div className="flex justify-end mb-4">
+            <button
+              className="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded"
+              onClick={handleEditClick}
+            >
+              Edit Stats
+            </button>
+          </div>
+        )}
+
         {/* Display Stats */}
         <dl className="grid grid-cols-1 gap-x-8 gap-y-16 text-center lg:grid-cols-3">
           {stats.map((stat) => (
@@ -70,7 +83,10 @@ export default function Stats() {
               className="mx-auto w-full max-w-xs flex flex-col gap-y-4 text-gray-100 p-6 rounded-lg shadow-lg"
               style={{ backgroundColor: colors.lightRed }}
             >
-              <dt className="text-base leading-7" style={{ color: colors.grey }}>
+              <dt
+                className="text-base leading-7"
+                style={{ color: colors.grey }}
+              >
                 {stat.name}
               </dt>
               <dd
