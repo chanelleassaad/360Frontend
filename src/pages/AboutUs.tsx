@@ -1,114 +1,7 @@
-// import PartnerCard from "../components/organisms/PartnerCard";
-// import profile1 from "../assets/profile1.png";
-// import React, { useState } from "react";
-
-// function AboutUs() {
-//   const partners = [
-//     {
-//       name: "Joseph Hannouch",
-//       imageUrl: profile1, // Replace with actual image URL
-//       description: "Don't Deliver a Product, Deliver Experience.",
-//       details:
-//         "HelloI am Lebanese\nHelloI am Lebanese\nHelloI am Lebanese\nHelloI am Lebanese\nHelloI am Lebanese\nHelloI am Lebanese\nHelloI am Lebanese\nHelloI am Lebanese\nHelloI am Lebanese\nHelloI am Lebanese\nHelloI am Lebanese\nHelloI am Lebanese\nHelloI am Lebanese\nHelloI am Lebanese\nHelloI am Lebanese\nHelloI am Lebanese\nHelloI am Lebanese\nHelloI am Lebanese\nHelloI am Lebanese\nHHelloI am Lebnese\nHelloI am Lebanese\nHelloI am Lebanese\nHelloI am Lebanese\nHelloI am Lebanese\nHelloI am Lebanese\nHelloI am Lebanese\nHelloI am Lebanese\nHello",
-//     },
-//     {
-//       name: "Joseph Hannouch",
-//       imageUrl: profile1, // Replace with actual image URL
-//       description: "Don't Deliver a Product, Deliver Experience.",
-//       details: "",
-//     },
-//     {
-//       name: "Joseph Hannouch",
-//       imageUrl: profile1, // Replace with actual image URL
-//       description: "Don't Deliver a Product, Deliver Experience.",
-//       details: "",
-//     },
-//   ];
-
-//   const [isEditing, setIsEditing] = useState(false);
-//   const [text, setText] = useState(
-//     "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean commodo ligula eget dolor. Aenean massa. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Donec quam felis, ultricies nec, pellentesque eu, pretium quis, sem. Nulla consequat massa quis enim. Donec pede justo, fringilla vel, aliquet nec, vulputate eget, arcu."
-//   );
-
-//   const handleEditClick = () => {
-//     setIsEditing(!isEditing);
-//   };
-
-//   const handleDeleteClick = () => {
-//     // Add logic to delete or discard changes
-//     setText(
-//       "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean commodo ligula eget dolor. Aenean massa. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Donec quam felis, ultricies nec, pellentesque eu, pretium quis, sem. Nulla consequat massa quis enim. Donec pede justo, fringilla vel, aliquet nec, vulputate eget, arcu."
-//     );
-//     setIsEditing(false);
-//   };
-
-//   return (
-//     <div>
-//       <div className="p-6">
-//         <div className="relative bg-red-600 text-white p-6 rounded-lg shadow-lg">
-//       {isEditing ? (
-//         <textarea
-//           className="w-full bg-red-500 text-white p-2 rounded"
-//           value={text}
-//           onChange={(e) => setText(e.target.value)}
-//           rows={5}
-//         />
-//       ) : (
-//         <p className="text-center">{text}</p>
-//       )}
-
-//       <div className="flex justify-end mt-4">
-//         {isEditing ? (
-//           <>
-//             <button
-//               className="bg-gray-500 hover:bg-gray-700 text-white font-bold py-1 px-2 rounded mr-2"
-//               onClick={handleEditClick}
-//             >
-//               Save
-//             </button>
-//             <button
-//               className="bg-gray-500 hover:bg-gray-700 text-white font-bold py-1 px-2 rounded"
-//               onClick={handleDeleteClick}
-//             >
-//               Delete
-//             </button>
-//           </>
-//         ) : (
-//           <button
-//             className="bg-gray-500 hover:bg-gray-700 text-white font-bold py-1 px-2 rounded"
-//             onClick={handleEditClick}
-//           >
-//             Edit
-//           </button>
-//         )}
-//       </div>
-//     </div>
-
-
-//       </div>
-//       <h1 className="section-title">MEET THE PARTNERS</h1>
-//       <div className="flex flex-col md:flex-row justify-center items-center md:space-x-20 space-y-4 md:space-y-0">
-//         {partners.map((partner, index) => (
-//           <div key={index} className="max-w-sm">
-//             <PartnerCard
-//               name={partner.name}
-//               imageUrl={partner.imageUrl}
-//               description={partner.description}
-//               details={partner.details}
-//             />
-//           </div>
-//         ))}
-//       </div>
-//     </div>
-//   );
-// }
-
-// export default AboutUs;
-
-
-import React, { useState } from "react";
+import { useEffect, useState } from "react";
 import PartnerCard from "../components/organisms/PartnerCard";
 import profile1 from "../assets/profile1.png";
+import { useSelector } from "react-redux";
 
 function AboutUs() {
   const initialPartners = [
@@ -139,6 +32,9 @@ function AboutUs() {
   const [text, setText] = useState(
     "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean commodo ligula eget dolor. Aenean massa. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Donec quam felis, ultricies nec, pellentesque eu, pretium quis, sem. Nulla consequat massa quis enim. Donec pede justo, fringilla vel, aliquet nec, vulputate eget, arcu."
   );
+  const [canEdit, setCanEdit] = useState(false);
+
+  const { userToken } = useSelector((state: any) => state.auth);
 
   const handleEditClickText = () => {
     setIsEditing(!isEditing);
@@ -183,57 +79,67 @@ function AboutUs() {
     setEditingPartners(updatedPartners);
   };
 
+  useEffect(() => {
+    if (userToken) setCanEdit(true);
+    else setCanEdit(false);
+    console.log(userToken);
+  }, [userToken]);
+
   return (
     <div>
       <div className="p-6">
-      <div className="relative bg-red-600 text-white p-6 rounded-lg shadow-lg">
-       {isEditing ? (
-          <textarea
-            className="w-full bg-red-500 text-white p-2 rounded"
-            value={text}
-            onChange={(e) => setText(e.target.value)}
-            rows={5}
-          />
-        ) : (
-          <p className="text-center">{text}</p>
-        )}
-
-        <div className="flex justify-end mt-4">
+        <div className="relative bg-red-600 text-white p-6 rounded-lg shadow-lg">
           {isEditing ? (
-            <>
-              <button
-                className="bg-gray-500 hover:bg-gray-700 text-white font-bold py-1 px-2 rounded mr-2"
-                onClick={handleEditClickText}
-              >
-                Save
-              </button>
-              <button
-                className="bg-gray-500 hover:bg-gray-700 text-white font-bold py-1 px-2 rounded"
-                onClick={handleDeleteClick}
-              >
-                Delete
-              </button>
-            </>
+            <textarea
+              className="w-full bg-red-500 text-white p-2 rounded"
+              value={text}
+              onChange={(e) => setText(e.target.value)}
+              rows={5}
+            />
           ) : (
-            <button
-              className="bg-gray-500 hover:bg-gray-700 text-white font-bold py-1 px-2 rounded"
-              onClick={handleEditClickText}
-            >
-              Edit
-            </button>
+            <p className="text-center">{text}</p>
+          )}
+
+          {canEdit && (
+            <div className="flex justify-end mt-4">
+              {isEditing ? (
+                <>
+                  <button
+                    className="bg-gray-500 hover:bg-gray-700 text-white font-bold py-1 px-2 rounded mr-2"
+                    onClick={handleEditClickText}
+                  >
+                    Save
+                  </button>
+                  <button
+                    className="bg-gray-500 hover:bg-gray-700 text-white font-bold py-1 px-2 rounded"
+                    onClick={handleDeleteClick}
+                  >
+                    Delete
+                  </button>
+                </>
+              ) : (
+                <button
+                  className="bg-gray-500 hover:bg-gray-700 text-white font-bold py-1 px-2 rounded"
+                  onClick={handleEditClickText}
+                >
+                  Edit
+                </button>
+              )}
+            </div>
           )}
         </div>
-      </div>
 
         {/* Edit Partners Button */}
-        <div className="flex justify-end mt-6 mb-4">
-          <button
-            className="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded"
-            onClick={handleEditClick}
-          >
-            Edit Partners
-          </button>
-        </div>
+        {canEdit && (
+          <div className="flex justify-end mt-6 mb-4">
+            <button
+              className="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded"
+              onClick={handleEditClick}
+            >
+              Edit Partners
+            </button>
+          </div>
+        )}
 
         {/* Display Partner Cards */}
         <h1 className="section-title">MEET THE PARTNERS</h1>
@@ -279,7 +185,11 @@ function AboutUs() {
                       placeholder="Description"
                       value={partner.description}
                       onChange={(e) =>
-                        handlePartnerChange(index, "description", e.target.value)
+                        handlePartnerChange(
+                          index,
+                          "description",
+                          e.target.value
+                        )
                       }
                     />
                     <input

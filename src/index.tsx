@@ -1,30 +1,38 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
-import { BrowserRouter as Router, Route, Routes, Navigate } from "react-router-dom";
+import {
+  BrowserRouter as Router,
+  Route,
+  Routes,
+  Navigate,
+} from "react-router-dom";
 import "./index.css";
 import App from "./App";
-import Footer from "./components/organisms/Footer";
 import reportWebVitals from "./reportWebVitals";
 import "./styles.css";
-import Header from "./components/organisms/Header";
-import Login from "./pages/login";
+import Login from "./pages/LoginPage";
+import { Provider } from "react-redux";
+import store from "./store/store";
+import AuthProvider from "./store/authentication/AuthProvider";
 
 const root = ReactDOM.createRoot(
   document.getElementById("root") as HTMLElement
 );
 
 root.render(
-  <React.StrictMode>
-    <Router>
-      <Header />
-      <Routes>
-        <Route path="/*" element={<App />} />
-        <Route path="/admin" element={<Login />} />
-        <Route path="/admin" element={<Navigate to="/admin" replace />} />
-      </Routes>
-      <Footer />
-    </Router>
-  </React.StrictMode>
+  <Provider store={store}>
+    <AuthProvider>
+      <React.StrictMode>
+        <Router>
+          <Routes>
+            <Route path="/*" element={<App />} />
+            <Route path="/admin" element={<Login />} />
+            <Route path="/admin" element={<Navigate to="/admin" replace />} />
+          </Routes>
+        </Router>
+      </React.StrictMode>
+    </AuthProvider>
+  </Provider>
 );
 
 // If you want to start measuring performance in your app, pass a function
