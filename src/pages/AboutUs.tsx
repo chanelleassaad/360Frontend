@@ -2,26 +2,33 @@ import { useEffect, useState } from "react";
 import PartnerCard from "../components/organisms/PartnerCard";
 import profile1 from "../assets/profile1.png";
 import { useSelector } from "react-redux";
+import ReButton from "../components/molecules/ReButton";
+import { FaEdit } from "react-icons/fa";
+import EditModal from "../components/template/EditModal";
+import { IPartner } from "../interfaces/IPartner";
 
 function AboutUs() {
-  const initialPartners = [
+  const initialPartners: IPartner[] = [
     {
-      name: "Joseph Hannouch",
+      _id: 1,
+      fullName: "Joseph Hannouch",
       imageUrl: profile1,
-      description: "Don't Deliver a Product, Deliver Experience.",
-      details: "Some details about Joseph",
+      quote: "Don't Deliver a Product, Deliver Experience.",
+      description: "Some details about Joseph",
     },
     {
-      name: "Joseph Hannouch",
+      _id: 2,
+      fullName: "Joseph Hannouch",
       imageUrl: profile1,
-      description: "Don't Deliver a Product, Deliver Experience.",
-      details: "Some details about Joseph",
+      quote: "Don't Deliver a Product, Deliver Experience.",
+      description: "Some details about Joseph",
     },
     {
-      name: "Joseph Hannouch",
+      _id: 3,
+      fullName: "Joseph Hannouch",
       imageUrl: profile1,
-      description: "Don't Deliver a Product, Deliver Experience.",
-      details: "Some details about Joseph",
+      quote: "Don't Deliver a Product, Deliver Experience.",
+      description: "Some details about Joseph",
     },
   ];
 
@@ -36,45 +43,38 @@ function AboutUs() {
   const [canEdit, setCanEdit] = useState(false);
   const { userToken } = useSelector((state: any) => state.auth);
 
-  const handleEditClickText = () => {
+  const handleEditText = () => {
     setIsEditing(!isEditing);
   };
 
-  const handleDeleteClick = () => {
-    // Add logic to delete or discard changes
-    setText(
-      "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean commodo ligula eget dolor. Aenean massa. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Donec quam felis, ultricies nec, pellentesque eu, pretium quis, sem. Nulla consequat massa quis enim. Donec pede justo, fringilla vel, aliquet nec, vulputate eget, arcu."
-    );
-    setIsEditing(false);
-  };
-
-  const handleEditClick = () => {
+  const handleEditPartners = () => {
     setEditingPartners([...partners]);
     setIsPartnerModalOpen(true);
   };
 
-  const handleSaveClick = () => {
+  const handleSavePartners = () => {
     setPartners(editingPartners);
     setIsPartnerModalOpen(false);
   };
 
   const handleAddPartner = () => {
     const newPartner = {
-      name: "New Partner",
-      imageUrl: "", // You can choose default image logic here
-      description: "New partner description",
-      details: "Details about the new partner",
+      _id: partners.length,
+      fullName: "",
+      imageUrl: "",
+      quote: "",
+      description: "",
     };
     setEditingPartners([...editingPartners, newPartner]);
   };
 
-  const handleDeletePartner = (index: number) => {
-    setEditingPartners(editingPartners.filter((_, i) => i !== index));
+  const handleDeletePartner = (id: number) => {
+    setEditingPartners(editingPartners.filter((partner) => partner._id !== id));
   };
 
-  const handlePartnerChange = (index: number, field: string, value: string) => {
-    const updatedPartners = editingPartners.map((partner, i) =>
-      i === index ? { ...partner, [field]: value } : partner
+  const handlePartnerChange = (id: number, field: any, value: string) => {
+    const updatedPartners = editingPartners.map((partner) =>
+      partner._id === id ? { ...partner, [field]: value } : partner
     );
     setEditingPartners(updatedPartners);
   };
@@ -82,7 +82,6 @@ function AboutUs() {
   useEffect(() => {
     if (userToken) setCanEdit(true);
     else setCanEdit(false);
-    console.log(userToken);
   }, [userToken]);
 
   return (
@@ -104,53 +103,37 @@ function AboutUs() {
             <div className="flex justify-end mt-4">
               {isEditing ? (
                 <>
-                  <button
-                    className="bg-gray-500 hover:bg-gray-700 text-white font-bold py-1 px-2 rounded mr-2"
-                    onClick={handleEditClickText}
-                  >
-                    Save
-                  </button>
-                  <button
-                    className="bg-gray-500 hover:bg-gray-700 text-white font-bold py-1 px-2 rounded"
-                    onClick={handleDeleteClick}
-                  >
-                    Delete
-                  </button>
+                  <ReButton onClick={handleEditText} name="Cancel" />
+                  <ReButton
+                    onClick={handleEditText}
+                    name="Save Changes"
+                    backgroundColor="green"
+                  />
                 </>
               ) : (
-                <button
-                  className="bg-gray-500 hover:bg-gray-700 text-white font-bold py-1 px-2 rounded"
-                  onClick={handleEditClickText}
-                >
-                  Edit
-                </button>
+                <ReButton icon={<FaEdit />} onClick={handleEditText} />
               )}
             </div>
           )}
         </div>
 
-        {/* Edit Partners Button */}
-        {canEdit && (
-          <div className="flex justify-end mt-6 mb-4">
-            <button
-              className="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded"
-              onClick={handleEditClick}
-            >
-              Edit Partners
-            </button>
-          </div>
-        )}
-
         {/* Display Partner Cards */}
-        <h1 className="section-title">MEET THE PARTNERS</h1>
+        <div className="flex justify-center mt-10">
+          <h1 className="section-title">MEET THE PARTNERS</h1>
+          {/* Edit Partners Button */}
+          {canEdit && (
+            <ReButton icon={<FaEdit />} onClick={handleEditPartners} />
+          )}
+        </div>
+
         <div className="flex flex-col md:flex-row justify-center items-center md:space-x-20 space-y-4 md:space-y-0">
           {partners.map((partner, index) => (
             <div key={index} className="max-w-sm">
               <PartnerCard
-                name={partner.name}
+                name={partner.fullName}
                 imageUrl={partner.imageUrl}
-                description={partner.description}
-                details={partner.details}
+                description={partner.quote}
+                details={partner.description}
               />
             </div>
           ))}
@@ -158,81 +141,16 @@ function AboutUs() {
 
         {/* Modal for Editing Partners */}
         {isPartnerModalOpen && (
-          <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
-            <div className="bg-white p-6 rounded-lg max-w-3xl w-full">
-              <h2 className="text-xl font-bold mb-4">Edit Partners</h2>
-              <div className="flex flex-col gap-y-4">
-                {editingPartners.map((partner, index) => (
-                  <div key={index} className="flex items-center gap-x-4">
-                    <input
-                      className="text-base leading-7 p-2 rounded w-1/4"
-                      placeholder="Partner Name"
-                      value={partner.name}
-                      onChange={(e) =>
-                        handlePartnerChange(index, "name", e.target.value)
-                      }
-                    />
-                    <input
-                      className="text-base leading-7 p-2 rounded w-1/4"
-                      placeholder="Image URL"
-                      value={partner.imageUrl}
-                      onChange={(e) =>
-                        handlePartnerChange(index, "imageUrl", e.target.value)
-                      }
-                    />
-                    <input
-                      className="text-base leading-7 p-2 rounded w-1/4"
-                      placeholder="Description"
-                      value={partner.description}
-                      onChange={(e) =>
-                        handlePartnerChange(
-                          index,
-                          "description",
-                          e.target.value
-                        )
-                      }
-                    />
-                    <input
-                      className="text-base leading-7 p-2 rounded w-1/4"
-                      placeholder="Details"
-                      value={partner.details}
-                      onChange={(e) =>
-                        handlePartnerChange(index, "details", e.target.value)
-                      }
-                    />
-                    <button
-                      className="bg-red-500 hover:bg-red-700 text-white font-bold py-1 px-2 rounded"
-                      onClick={() => handleDeletePartner(index)}
-                    >
-                      Delete
-                    </button>
-                  </div>
-                ))}
-              </div>
-              <div className="flex justify-between mt-4">
-                <button
-                  className="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded"
-                  onClick={handleAddPartner}
-                >
-                  Add Partner
-                </button>
-                <div>
-                  <button
-                    className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded mr-2"
-                    onClick={handleSaveClick}
-                  >
-                    Save
-                  </button>
-                  <button
-                    className="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded"
-                    onClick={() => setIsPartnerModalOpen(false)}
-                  >
-                    Cancel
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
+          <EditModal
+            isOpen={isPartnerModalOpen}
+            onClose={() => setIsPartnerModalOpen(false)}
+            editingItems={editingPartners}
+            onSave={handleSavePartners}
+            onDelete={handleDeletePartner}
+            onAdd={handleAddPartner}
+            type="partners"
+            onChange={handlePartnerChange}
+          />
         )}
       </div>
     </div>
