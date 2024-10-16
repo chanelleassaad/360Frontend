@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { MdAdd, MdDelete } from "react-icons/md";
 import ReButton from "../molecules/ReButton";
 import { IPartner } from "../../interfaces/IPartner";
@@ -28,6 +29,19 @@ const EditModal = ({
   type,
   onChange,
 }: EditModalProps) => {
+  // Prevent background scroll when modal is open
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "unset";
+    }
+
+    return () => {
+      document.body.style.overflow = "unset"; // Cleanup on unmount
+    };
+  }, [isOpen]);
+
   if (!isOpen) return null;
 
   // Define input fields based on the type (partners or stats)
@@ -43,17 +57,27 @@ const EditModal = ({
           },
         ]
       : [
-          { placeholder: "Stat Name", field: "title" as keyof IStat },
-          { placeholder: "Value", field: "description" as keyof IStat },
+          { placeholder: "Title", field: "title" as keyof IStat },
+          { placeholder: "Description", field: "description" as keyof IStat },
         ];
 
+  // Handle clicks outside the modal to close it
+  const handleOverlayClick = (e: React.MouseEvent) => {
+    if (e.currentTarget === e.target) {
+      onClose();
+    }
+  };
+
   return (
-    <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 ">
-      <div className="bg-white p-6 rounded-lg max-w-3xl w-full">
+    <div
+      className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50"
+      onClick={handleOverlayClick}
+    >
+      <div className="bg-white p-6 rounded-lg max-w-3xl w-full relative">
         <h2 className="text-xl font-bold mb-4">
           Edit {type === "partners" ? "Partners" : "Stats"}
         </h2>
-        <div className="overflow-x-auto">
+        <div className="overflow-auto max-h-[60vh]">
           <table className="min-w-full">
             <thead>
               <tr>
