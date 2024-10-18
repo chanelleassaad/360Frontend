@@ -1,6 +1,7 @@
 import { AtSymbolIcon, PhoneIcon } from "@heroicons/react/24/outline";
 import { useRef } from "react";
 import image from "../assets/360logo.png";
+import { api } from "../api/ProjectsApi";
 
 const features = [
   {
@@ -25,12 +26,44 @@ const getIconComponent = (iconName: string) => {
 };
 
 export default function ContactUs() {
-  // form in order for the user to contact me
+  // form reference
   const formRef = useRef<HTMLFormElement | null>(null);
 
   const handleReset = () => {
     if (formRef.current) {
       formRef.current.reset();
+    }
+  };
+
+  const sendEmail = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();  // Prevent form from reloading the page
+  
+    if (!formRef.current) {
+      console.error("Form reference is null.");
+      return;
+    }
+  
+    // Collect form data using querySelector
+    const name = formRef.current.querySelector<HTMLInputElement>("#first-name")?.value;
+    const email = formRef.current.querySelector<HTMLInputElement>("#email")?.value;
+    const subject = formRef.current.querySelector<HTMLInputElement>("#subject")?.value;
+    const message = formRef.current.querySelector<HTMLTextAreaElement>("#message")?.value;
+  
+    const data = {
+      name: name || "",  // fallback to an empty string if the field is empty
+      email: email || "",
+      subject: subject || "",
+      message: message || "",
+    };
+  
+    try {
+      const response = await api.post("/email/send-email", data);  // Correct method is POST
+      console.log("Email successfully sent");
+      alert("Email sent successfully!");
+      handleReset();  // Reset the form if email is sent successfully
+    } catch (error) {
+      console.error("Error sending email:", error);
+      alert("Error occurred while sending the email.");
     }
   };
 
@@ -60,7 +93,11 @@ export default function ContactUs() {
           </div>
         </div>
 
-        <form className="flex-1 mt-4 mx-auto max-w-xl bg-white p-6 rounded-md mb-6">
+        <form
+          className="flex-1 mt-4 mx-auto max-w-xl bg-white p-6 rounded-md mb-6"
+          ref={formRef}
+          onSubmit={sendEmail}
+        >
           <div className="grid grid-cols-1 gap-x-8 gap-y-6 sm:grid-cols-2">
             <div>
               <label
@@ -81,17 +118,17 @@ export default function ContactUs() {
             </div>
             <div>
               <label
-                htmlFor="last-name"
+                htmlFor="subject"
                 className="block text-sm font-semibold leading-6 text-gray-900"
               >
-                Last name
+                Subject
               </label>
               <div className="mt-2.5">
                 <input
                   type="text"
-                  name="last-name"
-                  id="last-name"
-                  autoComplete="family-name"
+                  name="subject"
+                  id="subject"
+                  autoComplete="subject"
                   className="block w-full rounded-md border-0 px-3.5 py-2 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-grey-600 sm:text-sm sm:leading-6"
                 />
               </div>
@@ -134,7 +171,6 @@ export default function ContactUs() {
           <div className="mt-10">
             <button
               type="submit"
-              onClick={handleReset}
               className="block w-full rounded-md bg-gray-700 px-3.5 py-2.5 text-center text-sm font-semibold text-white shadow-sm hover:bg-gray-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-600"
             >
               Submit
