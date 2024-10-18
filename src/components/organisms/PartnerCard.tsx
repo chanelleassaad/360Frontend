@@ -22,24 +22,20 @@ function PartnerCard({
   };
 
   return (
-    <div className="bg-white max-w-xs p-3 rounded-lg shadow-md">
+    <div className="bg-white w-64 h-72 p-3 rounded-lg shadow-md lg:h-96">
       {/* Container with perspective to create 3D flip effect */}
-      <div
-        className="relative"
-        style={{ perspective: "1000px" }} // Perspective for 3D effect
-      >
+      <div className="relative" style={{ perspective: "1000px" }}>
         <div
-          className={`relative w-full h-64 transition-transform duration-700`}
+          className={`relative transition-transform duration-700 flex justify-center h-48 lg:h-72 `}
           style={{
             transformStyle: "preserve-3d",
-            transform: isFlipped ? "rotateY(180deg)" : "rotateY(0deg)", // Dynamically apply rotation
+            transform: isFlipped ? "rotateY(180deg)" : "rotateY(0deg)",
             cursor: "pointer",
           }}
           onClick={handleFlip}
         >
           {/* Front side (Image) */}
           <div
-            className="absolute w-full h-full"
             style={{
               backfaceVisibility: "hidden",
               transform: "rotateY(0deg)",

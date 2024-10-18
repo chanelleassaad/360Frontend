@@ -71,7 +71,7 @@ export default function Stats() {
       await Promise.all(deletedStatIds.map((statId) => deleteStat(statId)));
 
       // Update the state only once after all API calls are complete
-      setStats((prevStats) => {
+      setStats(() => {
         const updatedStatsMap = updatedExistingStats.reduce((acc, stat) => {
           acc[stat._id] = { ...stat }; // Update with edited stat
           return acc;
@@ -107,7 +107,7 @@ export default function Stats() {
     );
   };
 
-  const handleStatChange = (id: number, field: string, value: string) => {
+  const handleStatChange = (id: number, field: string, value: any) => {
     const updatedStatChange = editingStats.map((stat) =>
       stat._id === id ? { ...stat, [field]: value } : stat
     );
@@ -147,7 +147,7 @@ export default function Stats() {
         )}
 
         {/* Display Stats */}
-        <dl className="grid grid-cols-1 gap-x-8 gap-y-16 text-center lg:grid-cols-3">
+        <dl className="grid grid-cols-1 gap-x-8 gap-y-3 text-center md:grid-cols-3 lg:grid-cols-3">
           {stats.map((stat) => (
             <div
               key={stat._id}

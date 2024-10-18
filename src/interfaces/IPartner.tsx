@@ -3,5 +3,5 @@ export interface IPartner {
   fullName: string;
   quote: string;
   description: string;
-  imageUrl: string;
+  imageUrl: File | null;
 }
