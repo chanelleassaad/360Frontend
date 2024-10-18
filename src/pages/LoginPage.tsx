@@ -3,14 +3,17 @@ import { useNavigate } from "react-router-dom";
 import { ILogin } from "../interfaces/ILogin";
 import { useAuth } from "../store/authentication/AuthContext";
 import { loginUser } from "../api/AdminApi";
+import InputField from "../components/molecules/InputField";
 
 export default function Login() {
   const [errorMessage, setErrorMessage] = useState("");
-  const { signIn } = useAuth(); // Ensure this hook is defined correctly
+  const [loading, setLoading] = useState(false);
+  const { signIn } = useAuth();
   const navigate = useNavigate();
 
   const onSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault(); // Prevent default form submission
+    event.preventDefault();
+    setLoading(true); // Start loading state
 
     const formData = new FormData(event.currentTarget);
     const userData: ILogin = {
@@ -19,11 +22,7 @@ export default function Login() {
     };
 
     try {
-      const res = await loginUser(userData); // Ensure loginUser is imported and defined
-      console.log(res);
-
-      // const { accessToken, refreshToken } = res;
-      // await signIn(userData.username, accessToken, refreshToken);
+      const res = await loginUser(userData); // Call your login API
       await signIn(userData.username);
       setErrorMessage("");
       navigate("/");
@@ -31,6 +30,8 @@ export default function Login() {
       setErrorMessage(
         error instanceof Error ? error.message : "Error occurred"
       );
+    } finally {
+      setLoading(false); // Stop loading state
     }
   };
 
@@ -45,59 +46,27 @@ export default function Login() {
 
         <div className="mt-10 sm:mx-auto sm:w-full sm:max-w-sm bg-white p-6 rounded-lg shadow">
           <form onSubmit={onSubmit} className="space-y-6">
-            <div>
-              <label
-                htmlFor="username"
-                className="block text-sm font-medium leading-6 text-gray-900"
-              >
-                Username
-              </label>
-              <div className="mt-2">
-                <input
-                  id="username"
-                  name="username"
-                  type="text"
-                  required
-                  className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-gray-600 sm:text-sm sm:leading-6"
-                />
-              </div>
-            </div>
+            {/* Username Field */}
+            <InputField id="username" label="Username" type="text" required />
 
-            <div>
-              <div className="flex items-center justify-between">
-                <label
-                  htmlFor="password"
-                  className="block text-sm font-medium leading-6 text-gray-900"
-                >
-                  Password
-                </label>
-                <div className="text-sm">
-                  <a
-                    href="#"
-                    className="font-semibold text-gray-600 hover:text-gray-500"
-                  >
-                    Forgot password?
-                  </a>
-                </div>
-              </div>
-              <div className="mt-2">
-                <input
-                  id="password"
-                  name="password"
-                  type="password"
-                  required
-                  autoComplete="current-password"
-                  className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-gray-600 sm:text-sm sm:leading-6"
-                />
-              </div>
-            </div>
+            {/* Password Field */}
+            <InputField
+              id="password"
+              label="Password"
+              type="password"
+              isPassword
+              required
+            />
 
             <div>
               <button
                 type="submit"
-                className="flex w-full justify-center rounded-md bg-gray-600 px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-gray-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-600"
+                disabled={loading}
+                className={`flex w-full justify-center rounded-md bg-gray-600 px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-gray-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-600 ${
+                  loading ? "opacity-50 cursor-not-allowed" : ""
+                }`}
               >
-                Sign in
+                {loading ? "Signing in..." : "Sign in"}
               </button>
             </div>
 

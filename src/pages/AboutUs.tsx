@@ -1,240 +1,251 @@
 import { useEffect, useState } from "react";
 import PartnerCard from "../components/organisms/PartnerCard";
-import profile1 from "../assets/profile1.png";
 import { useSelector } from "react-redux";
-
+import ReButton from "../components/molecules/ReButton";
+import { FaEdit } from "react-icons/fa";
+import EditModal from "../components/template/EditModal";
+import { IPartner } from "../interfaces/IPartner";
+import {
+  getPartners,
+  addPartner,
+  editPartner,
+  deletePartner,
+} from "../api/PartnersApi";
 function AboutUs() {
-  const initialPartners = [
-    {
-      name: "Joseph Hannouch",
-      imageUrl: profile1,
-      description: "Don't Deliver a Product, Deliver Experience.",
-      details: "Some details about Joseph",
-    },
-    {
-      name: "Joseph Hannouch",
-      imageUrl: profile1,
-      description: "Don't Deliver a Product, Deliver Experience.",
-      details: "Some details about Joseph",
-    },
-    {
-      name: "Joseph Hannouch",
-      imageUrl: profile1,
-      description: "Don't Deliver a Product, Deliver Experience.",
-      details: "Some details about Joseph",
-    },
-  ];
-
-  const [partners, setPartners] = useState(initialPartners);
+  const [partners, setPartners] = useState<any[]>([]);
   const [isPartnerModalOpen, setIsPartnerModalOpen] = useState(false);
-  const [editingPartners, setEditingPartners] = useState([...initialPartners]);
+  const [editingPartners, setEditingPartners] = useState<any[]>([]);
   const [isEditing, setIsEditing] = useState(false);
   const [text, setText] = useState(
     "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean commodo ligula eget dolor. Aenean massa. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Donec quam felis, ultricies nec, pellentesque eu, pretium quis, sem. Nulla consequat massa quis enim. Donec pede justo, fringilla vel, aliquet nec, vulputate eget, arcu."
   );
-  const [canEdit, setCanEdit] = useState(false);
 
+  const [canEdit, setCanEdit] = useState(false);
   const { userToken } = useSelector((state: any) => state.auth);
 
-  const handleEditClickText = () => {
-    setIsEditing(!isEditing);
-  };
-
-  const handleDeleteClick = () => {
-    // Add logic to delete or discard changes
-    setText(
-      "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean commodo ligula eget dolor. Aenean massa. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Donec quam felis, ultricies nec, pellentesque eu, pretium quis, sem. Nulla consequat massa quis enim. Donec pede justo, fringilla vel, aliquet nec, vulputate eget, arcu."
-    );
-    setIsEditing(false);
-  };
-
-  const handleEditClick = () => {
-    setEditingPartners([...partners]);
-    setIsPartnerModalOpen(true);
-  };
-
-  const handleSaveClick = () => {
-    setPartners(editingPartners);
-    setIsPartnerModalOpen(false);
-  };
-
-  const handleAddPartner = () => {
-    const newPartner = {
-      name: "New Partner",
-      imageUrl: "", // You can choose default image logic here
-      description: "New partner description",
-      details: "Details about the new partner",
+  // Fetch partners from the API
+  useEffect(() => {
+    const fetchPartners = async () => {
+      try {
+        const data = await getPartners();
+        setPartners(data);
+      } catch (error) {
+        console.error("Error fetching partners:", error);
+      }
     };
-    setEditingPartners([...editingPartners, newPartner]);
-  };
 
-  const handleDeletePartner = (index: number) => {
-    setEditingPartners(editingPartners.filter((_, i) => i !== index));
-  };
-
-  const handlePartnerChange = (index: number, field: string, value: string) => {
-    const updatedPartners = editingPartners.map((partner, i) =>
-      i === index ? { ...partner, [field]: value } : partner
-    );
-    setEditingPartners(updatedPartners);
-  };
+    fetchPartners();
+  }, []);
 
   useEffect(() => {
     if (userToken) setCanEdit(true);
     else setCanEdit(false);
-    console.log(userToken);
   }, [userToken]);
+
+  // Toggle text edit mode
+  const handleEditText = () => {
+    setIsEditing(!isEditing);
+  };
+
+  // Edit partners - open modal with current partners
+  const handleEditPartners = () => {
+    setEditingPartners([...partners]);
+    setIsPartnerModalOpen(true);
+  };
+
+  const handleSavePartners = async () => {
+    // Check if any partner has missing fields
+    const hasMissingFields = editingPartners.some(
+      (partner) => !partner.fullName || !partner.description
+    );
+
+    if (hasMissingFields) {
+      alert(
+        "⚠️ Missing Fields\n\nPlease fill in all required fields (full name and description)."
+      );
+      return; // Stop execution if there are missing fields
+    }
+
+    // Find new partners (those that don't exist in the original partners array)
+    const newPartners = editingPartners.filter(
+      (editingPartner) =>
+        !partners.some((partner) => partner._id === editingPartner._id)
+    );
+
+    const newPartnerIds = newPartners.map((partner) => partner._id);
+
+    // Find deleted partners by checking which partners in the original array are not in the editing array
+    const deletedPartnerIds = partners
+      .filter(
+        (partner) =>
+          !editingPartners.some(
+            (editingPartner) => editingPartner._id === partner._id
+          )
+      )
+      .map((partner) => partner._id); // Get the IDs of deleted partners
+
+    // Find updated partners (those that are neither new nor deleted)
+    const updatedPartners = editingPartners.filter(
+      (partner) =>
+        !newPartnerIds.includes(partner._id) &&
+        !deletedPartnerIds.includes(partner._id)
+    );
+
+    try {
+      // Handle new partners (batch add)
+      const addedPartners = await Promise.all(
+        newPartners.map((partner) =>
+          addPartner({
+            fullName: partner.fullName,
+            description: partner.description,
+            quote: partner.quote,
+            imageUrl: partner.imageUrl, // Ensure all necessary fields are passed
+          })
+        )
+      );
+
+      // Handle updated partners (batch update)
+      const updatedExistingPartners = await Promise.all(
+        updatedPartners.map((partner) =>
+          editPartner(partner._id, {
+            fullName: partner.fullName,
+            description: partner.description,
+            quote: partner.quote,
+            imageUrl: partner.imageUrl, // Ensure all necessary fields are passed
+          })
+        )
+      );
+
+      // Handle deleted partners (batch delete)
+      await Promise.all(
+        deletedPartnerIds.map((partnerId) => deletePartner(partnerId))
+      );
+
+      // Update state with new and edited partners after all API calls are complete
+      setPartners(() => {
+        const updatedPartnersMap = updatedExistingPartners.reduce(
+          (acc, partner) => {
+            acc[partner._id] = { ...partner }; // Update with edited partner
+            return acc;
+          },
+          {}
+        );
+
+        return [
+          ...Object.values(updatedPartnersMap),
+          ...addedPartners.map((savedPartner) => ({
+            ...savedPartner,
+            _id: savedPartner._id,
+          })),
+        ];
+      });
+
+      setIsPartnerModalOpen(false);
+    } catch (error) {
+      console.error("Error saving partners:", error);
+    }
+  };
+
+  // Add a new partner (in UI and later to API)
+  const handleAddPartner = () => {
+    const newPartner: IPartner = {
+      _id: Math.random(), // Temporary ID for the UI
+      fullName: "",
+      imageUrl: null,
+      quote: "",
+      description: "",
+    };
+    setEditingPartners([...editingPartners, newPartner]);
+  };
+
+  // Delete partner from the UI and API
+  const handleDeletePartner = async (id: number) => {
+    try {
+      // if (id) await deletePartner(id);
+      setEditingPartners(
+        editingPartners.filter((partner) => partner._id !== id)
+      );
+    } catch (error) {
+      console.error("Error deleting partner:", error);
+    }
+  };
+
+  // Handle change in partner data in the modal
+  const handlePartnerChange = (id: number, field: string, value: any) => {
+    const updatedPartners = editingPartners.map((partner) =>
+      partner._id === id ? { ...partner, [field]: value } : partner
+    );
+    setEditingPartners(updatedPartners);
+  };
 
   return (
     <div>
-      <div className="p-6">
-        <div className="relative bg-red-600 text-white p-6 rounded-lg shadow-lg">
-          {isEditing ? (
-            <textarea
-              className="w-full bg-red-500 text-white p-2 rounded"
-              value={text}
-              onChange={(e) => setText(e.target.value)}
-              rows={5}
-            />
-          ) : (
-            <p className="text-center">{text}</p>
-          )}
-
-          {canEdit && (
-            <div className="flex justify-end mt-4">
-              {isEditing ? (
-                <>
-                  <button
-                    className="bg-gray-500 hover:bg-gray-700 text-white font-bold py-1 px-2 rounded mr-2"
-                    onClick={handleEditClickText}
-                  >
-                    Save
-                  </button>
-                  <button
-                    className="bg-gray-500 hover:bg-gray-700 text-white font-bold py-1 px-2 rounded"
-                    onClick={handleDeleteClick}
-                  >
-                    Delete
-                  </button>
-                </>
-              ) : (
-                <button
-                  className="bg-gray-500 hover:bg-gray-700 text-white font-bold py-1 px-2 rounded"
-                  onClick={handleEditClickText}
-                >
-                  Edit
-                </button>
-              )}
-            </div>
-          )}
-        </div>
-
-        {/* Edit Partners Button */}
-        {canEdit && (
-          <div className="flex justify-end mt-6 mb-4">
-            <button
-              className="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded"
-              onClick={handleEditClick}
-            >
-              Edit Partners
-            </button>
-          </div>
+      <div className="relative bg-red-600 text-white p-6 rounded-lg shadow-lg">
+        {isEditing ? (
+          <textarea
+            className="w-full bg-red-500 text-white p-2 rounded"
+            value={text}
+            onChange={(e) => setText(e.target.value)}
+            rows={5}
+          />
+        ) : (
+          <p className="text-center">{text}</p>
         )}
 
-        {/* Display Partner Cards */}
-        <h1 className="section-title">MEET THE PARTNERS</h1>
-        <div className="flex flex-col md:flex-row justify-center items-center md:space-x-20 space-y-4 md:space-y-0">
-          {partners.map((partner, index) => (
-            <div key={index} className="max-w-sm">
-              <PartnerCard
-                name={partner.name}
-                imageUrl={partner.imageUrl}
-                description={partner.description}
-                details={partner.details}
-              />
-            </div>
-          ))}
-        </div>
-
-        {/* Modal for Editing Partners */}
-        {isPartnerModalOpen && (
-          <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
-            <div className="bg-white p-6 rounded-lg max-w-3xl w-full">
-              <h2 className="text-xl font-bold mb-4">Edit Partners</h2>
-              <div className="flex flex-col gap-y-4">
-                {editingPartners.map((partner, index) => (
-                  <div key={index} className="flex items-center gap-x-4">
-                    <input
-                      className="text-base leading-7 p-2 rounded w-1/4"
-                      placeholder="Partner Name"
-                      value={partner.name}
-                      onChange={(e) =>
-                        handlePartnerChange(index, "name", e.target.value)
-                      }
-                    />
-                    <input
-                      className="text-base leading-7 p-2 rounded w-1/4"
-                      placeholder="Image URL"
-                      value={partner.imageUrl}
-                      onChange={(e) =>
-                        handlePartnerChange(index, "imageUrl", e.target.value)
-                      }
-                    />
-                    <input
-                      className="text-base leading-7 p-2 rounded w-1/4"
-                      placeholder="Description"
-                      value={partner.description}
-                      onChange={(e) =>
-                        handlePartnerChange(
-                          index,
-                          "description",
-                          e.target.value
-                        )
-                      }
-                    />
-                    <input
-                      className="text-base leading-7 p-2 rounded w-1/4"
-                      placeholder="Details"
-                      value={partner.details}
-                      onChange={(e) =>
-                        handlePartnerChange(index, "details", e.target.value)
-                      }
-                    />
-                    <button
-                      className="bg-red-500 hover:bg-red-700 text-white font-bold py-1 px-2 rounded"
-                      onClick={() => handleDeletePartner(index)}
-                    >
-                      Delete
-                    </button>
-                  </div>
-                ))}
-              </div>
-              <div className="flex justify-between mt-4">
-                <button
-                  className="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded"
-                  onClick={handleAddPartner}
-                >
-                  Add Partner
-                </button>
-                <div>
-                  <button
-                    className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded mr-2"
-                    onClick={handleSaveClick}
-                  >
-                    Save
-                  </button>
-                  <button
-                    className="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded"
-                    onClick={() => setIsPartnerModalOpen(false)}
-                  >
-                    Cancel
-                  </button>
-                </div>
-              </div>
-            </div>
+        {canEdit && (
+          <div className="flex justify-end mt-4">
+            {isEditing ? (
+              <>
+                <ReButton onClick={handleEditText} name="Cancel" />
+                <ReButton
+                  onClick={handleEditText}
+                  name="Save Changes"
+                  backgroundColor="green"
+                />
+              </>
+            ) : (
+              <ReButton icon={<FaEdit />} onClick={handleEditText} />
+            )}
           </div>
         )}
       </div>
+
+      {/* Display Partner Cards */}
+      <div className="flex justify-center mt-10">
+        <h1 className="section-title">MEET THE PARTNERS</h1>
+        {/* Edit Partners Button */}
+        {canEdit && <ReButton icon={<FaEdit />} onClick={handleEditPartners} />}
+      </div>
+
+      <div className="flex flex-wrap justify-center items-center ">
+        {partners.map((partner, index) => (
+          <div
+            key={index}
+            className="max-w-sm w-full pr-0 md:w-1/3 lg:w-1/4 my-2 md:mr-10 lg:mr-0 lg:pr-3 flex justify-center"
+          >
+            <PartnerCard
+              name={partner.fullName}
+              imageUrl={partner.imageUrl}
+              description={partner.quote}
+              details={partner.description}
+            />
+          </div>
+        ))}
+      </div>
+
+      {/* Modal for Editing Partners */}
+      {isPartnerModalOpen && (
+        <EditModal
+          isOpen={isPartnerModalOpen}
+          onClose={() => setIsPartnerModalOpen(false)}
+          editingItems={editingPartners}
+          onSave={handleSavePartners}
+          onDelete={handleDeletePartner}
+          onAdd={handleAddPartner}
+          type="partners"
+          onChange={handlePartnerChange}
+        />
+      )}
     </div>
   );
 }
