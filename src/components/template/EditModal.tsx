@@ -109,7 +109,7 @@ const EditModal = ({
       className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50"
       onClick={handleOverlayClick}
     >
-      <div className="bg-white p-6 rounded-lg sm:max-w-3xl md:max-w-4xl w-full relative ">
+      <div className="bg-white p-6 rounded-lg max-w-[90vw] relative ">
         <div className="flex justify-between">
           <h2 className="text-xl font-bold mb-4 text-center">
             Edit {type === "partners" ? "Partners" : "Stats"}
@@ -139,7 +139,7 @@ const EditModal = ({
                           <input
                             type="file"
                             accept="image/*"
-                            className="text-base p-2 rounded w-full"
+                            className="text-base p-2 rounded"
                             onChange={(e) => handleImageChange(item._id, e)}
                           />
                           {/* Show previously uploaded image or the newly selected image */}
@@ -155,9 +155,18 @@ const EditModal = ({
                             />
                           )}
                         </div>
+                      ) : field === "description" ? (
+                        <textarea
+                          className="text-base p-2 rounded border"
+                          value={(item as any)[field] || ""}
+                          onChange={(e) =>
+                            onChange(item._id, field, e.target.value)
+                          }
+                          rows={1} // Adjust the number of rows as needed
+                        />
                       ) : (
                         <input
-                          className="text-base p-2 rounded w-full border"
+                          className="text-base p-2 rounded border "
                           value={(item as any)[field] || ""}
                           onChange={(e) =>
                             onChange(item._id, field, e.target.value)
