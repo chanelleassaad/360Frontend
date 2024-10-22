@@ -29,7 +29,7 @@ const ProjectVideoModal = ({ project, isOpen, onClose }: any) => {
             <div className="flex-grow flex items-center justify-center">
               <iframe
                 className="w-full h-full object-cover"
-                src="https://www.youtube.com/embed/G7KNmW9a75Y"
+                src={project.video}
                 title="YouTube Video"
                 allowFullScreen
               ></iframe>

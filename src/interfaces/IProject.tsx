@@ -2,8 +2,8 @@ export interface IProject {
   _id: string;
   title: string;
   location: string;
-  images: string[];
+  images: any[];
   description: string;
   year: number;
-  video: string;
+  video: any | undefined;
 }
