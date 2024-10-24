@@ -14,17 +14,24 @@ import {
 import {
   getProjects,
   deleteProject,
-  updateProjectData,
+  deleteVideo,
+  uploadVideo,
+  editProjectData,
+  addImages,
+  deleteImages,
 } from "../../api/ProjectsApi";
 import { IProject } from "../../interfaces/IProject";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import { MdArrowBack, MdDelete, MdAdd } from "react-icons/md";
 import { useNavigate } from "react-router-dom";
 
+
 function EditProjects() {
   const [projects, setProjects] = useState<IProject[]>([]);
+  const [originalProjectData, setOriginalProjectData] = useState<IProject | null>(null);
   const [loading, setLoading] = useState(true);
   const [editingProjectId, setEditingProjectId] = useState<string | null>(null);
+  const [imagesToDelete, setImagesToDelete] = useState<string[]>([]);
 
   const navigate = useNavigate();
 
@@ -55,6 +62,19 @@ function EditProjects() {
     fetchProjects();
   }, []);
 
+  // Handle Cancel
+  const handleCancelEdit = () => {
+    if (originalProjectData) {
+      setProjects((prevProjects) =>
+        prevProjects.map((proj) =>
+          proj._id === originalProjectData._id ? originalProjectData : proj
+        )
+      );
+    }
+    setImagesToDelete([]);
+    setEditingProjectId(null);
+  };
+
   const handleFieldChange = (
     field: keyof IProject,
     project: IProject,
@@ -71,87 +91,120 @@ function EditProjects() {
   // Project
   const handleUpdateProject = async (project: IProject) => {
     try {
-      if (changedSections.data)
-        await updateProjectData(
+      if (changedSections.data) {
+        await editProjectData(
           project._id,
-          project.description,
+          project.title,
           project.location,
-          project.year
+          project.year,
+          project.description
         );
-      // await updateProject(project);
-      if (changedSections.images) {
-        // check which images added and which deleted
-        // endpoint for addded imagess
-        // endpoint for deleted images
       }
+  
+      if (changedSections.images && imagesToDelete.length > 0) {
+        await deleteImages(project._id, imagesToDelete); // Call deleteImages API
+      }
+  
       if (changedSections.video) {
-        // edit or delete video
+        if (project.video === null) {
+          // Delete the video if it's flagged for deletion
+          await deleteVideo(project._id);
+        } else if (typeof project.video === "string" && project.video.startsWith("blob:")) {
+          const videoBlob = await fetch(project.video).then((res) => res.blob());
+          const videoFile = new File([videoBlob], project.videoName || "default_name.mp4", { type: videoBlob.type });
+          await uploadVideo(project._id, videoFile);
+        }
       }
+  
+      // Refresh the projects from MongoDB after saving changes
+      const updatedProjects = await getProjects();
+      setProjects(updatedProjects);  // Update the frontend state with the latest projects from MongoDB
+  
       setEditingProjectId(null);
       setChangedSections({ data: false, video: false, images: false });
     } catch (error) {
       console.error("Error updating project:", error);
     }
   };
+  
 
   const handleDeleteProject = async (projectId: string) => {
     try {
       await deleteProject(projectId);
-      setProjects(projects.filter((project) => project._id !== projectId));
+      const updatedProjects = await getProjects();  // Fetch updated data
+      setProjects(updatedProjects);  // Update frontend state
     } catch (error) {
       console.error("Error deleting project:", error);
     }
   };
+  
 
   const handleEditProject = (projectId: string) => {
     setEditingProjectId(projectId);
+    const project = projects.find((proj) => proj._id === projectId);
+    if (project) {
+      setOriginalProjectData({ ...project }); // Save a copy of the original project data
+    }
   };
 
+   // Handle marking an image for deletion
+   const markImageForDeletion = (projectId: string, imageUrl: string) => {
+    const project = projects.find((proj) => proj._id === projectId);
+  
+    // Check if there is only one image left, prevent deletion
+    if (project?.images.length === 1) {
+      alert("Each project must have at least one image.");
+      return; // Prevent deletion if there's only one image
+    }
+  
+    setImagesToDelete((prev) => [...prev, imageUrl]);
+    setProjects((prev) =>
+      prev.map((proj) =>
+        proj._id === projectId
+          ? {
+              ...proj,
+              images: proj.images.filter((img) => img !== imageUrl), // Temporarily remove image from the UI
+            }
+          : proj
+      )
+    );
+    setChangedSections((prev) => ({ ...prev, images: true }));
+  };
+  
+
+
   // Images
-  const addImage = (projectId: string, files: FileList) => {
+  const addImage = async (projectId: string, files: FileList) => {
     if (!files) return;
-    const newImagePromises = Array.from(files).map((file) => {
-      return new Promise<string>((resolve) => {
-        const reader = new FileReader();
-        reader.onloadend = () => {
-          resolve(reader.result as string);
-        };
-        reader.readAsDataURL(file);
-      });
-    });
-    Promise.all(newImagePromises).then((newImageUrls) => {
-      setProjects((prevProjects) =>
-        prevProjects.map((proj) =>
-          proj._id === projectId
-            ? {
-                ...proj,
-                images: Array.isArray(proj.images)
-                  ? [...proj.images, ...newImageUrls]
-                  : newImageUrls,
-              }
-            : proj
-        )
-      );
+
+    try {
+      // Call the addImages endpoint with the projectId and selected image files
+      await addImages(projectId, files);
+
+      // Fetch updated projects after adding images
+      const updatedProjects = await getProjects();
+      setProjects(updatedProjects); // Update frontend state with the latest projects
       setChangedSections((prev) => ({ ...prev, images: true }));
-    });
+    } catch (error) {
+      console.error("Error uploading images:", error);
+    }
   };
 
   // Video
   const handleUploadVideo = (projectId: string, file: File) => {
-    const newVideoUrl = URL.createObjectURL(file);
-    console.log("Uploading video for project:", projectId);
-    console.log("New Video URL:", newVideoUrl);
-
-    // Update projects state with new video URL
+    const newVideoUrl = URL.createObjectURL(file);  // Create a URL for the selected video
     setProjects((prev) =>
       prev.map((proj) =>
-        proj._id === projectId ? { ...proj, video: newVideoUrl } : proj
+        proj._id === projectId
+          ? { ...proj, video: newVideoUrl, videoName: file.name } // Update video preview with the new video URL
+          : proj
       )
     );
-
-    // Mark video section as changed
     setChangedSections((prev) => ({ ...prev, video: true }));
   };
+  
+  
+
 
   const handleDeleteVideo = (projectId: string) => {
     setProjects((prev) =>
@@ -161,6 +214,7 @@ function EditProjects() {
     );
     setChangedSections((prev) => ({ ...prev, video: true }));
   };
+  
 
   if (loading) return <CircularProgress />;
 
@@ -258,6 +312,7 @@ function EditProjects() {
                 {project.video ? (
                   <>
                     <video
+                      key={project.video} 
                       controls
                       width="100%"
                       style={{ maxWidth: "600px", marginBottom: "10px" }}
@@ -303,20 +358,7 @@ function EditProjects() {
                       />
                       <IconButton
                         size="small"
-                        onClick={() =>
-                          setProjects((prev) =>
-                            prev.map((proj) =>
-                              proj._id === project._id
-                                ? {
-                                    ...proj,
-                                    images: proj.images.filter(
-                                      (_, imgIndex) => imgIndex !== index
-                                    ),
-                                  }
-                                : proj
-                            )
-                          )
-                        }
+                        onClick={() => markImageForDeletion(project._id, image)}
                         className="absolute top-0 right-0 text-white bg-red-500 rounded-full"
                       >
                         <MdDelete />
@@ -332,7 +374,7 @@ function EditProjects() {
                     onChange={(e) => {
                       const files = e.target.files;
                       if (files) {
-                        addImage(project._id, files);
+                        addImage(project._id, files); // Call addImage when images are selected
                       }
                     }}
                   />
@@ -368,7 +410,7 @@ function EditProjects() {
           <AccordionActions>
             {editingProjectId ? (
               <>
-                <Button onClick={() => setEditingProjectId(null)} color="error">
+                <Button onClick={handleCancelEdit} color="error">
                   Cancel
                 </Button>
                 <Button
