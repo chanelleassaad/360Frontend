@@ -50,9 +50,9 @@ export default function MainView() {
               Saudi Arabia
             </h3>
             <p className="mt-6 text-lg leading-8 text-gray-300">
-              Anim aute id magna aliqua ad ad non deserunt sunt. Qui irure qui
-              lorem cupidatat commodo. Elit sunt amet fugiat veniam occaecat
-              fugiat aliqua.
+              Our company is proud to be the first to host a groundbreaking
+              concert in Saudi Arabia, paving the way for new cultural
+              experiences in the region.
             </p>
           </div>
           {/* Logo section */}

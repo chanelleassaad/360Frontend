@@ -13,8 +13,8 @@ import {
 } from "@mui/material";
 import {
   getProjects,
-  updateProject,
   deleteProject,
+  updateProjectData,
 } from "../../api/ProjectsApi";
 import { IProject } from "../../interfaces/IProject";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
@@ -25,14 +25,20 @@ function EditProjects() {
   const [projects, setProjects] = useState<IProject[]>([]);
   const [loading, setLoading] = useState(true);
   const [editingProjectId, setEditingProjectId] = useState<string | null>(null);
-  const [displayImages, setDisplayImages] = useState<{
-    [key: string]: string[];
-  }>({});
+
   const navigate = useNavigate();
 
   const currentYear = new Date().getFullYear();
   const years = Array.from({ length: 100 }, (_, i) => currentYear - i);
-  const [videoUrl, setVideoUrl] = useState("");
+
+  const [changedSections, setChangedSections] = useState<{
+    data: boolean;
+    video: boolean;
+    images: boolean;
+  }>({ data: false, video: false, images: false });
+
+  const isSaveDisabled =
+    !changedSections.data && !changedSections.video && !changedSections.images;
 
   useEffect(() => {
     const fetchProjects = async () => {
@@ -49,10 +55,40 @@ function EditProjects() {
     fetchProjects();
   }, []);
 
-  const handleUpdateProject = async (project: any) => {
+  const handleFieldChange = (
+    field: keyof IProject,
+    project: IProject,
+    value: any
+  ) => {
+    (project[field] as typeof value) = value;
+    setChangedSections((prev) => ({ ...prev, data: true }));
+  };
+
+  const handleGoBack = () => {
+    navigate(-1);
+  };
+
+  // Project
+  const handleUpdateProject = async (project: IProject) => {
     try {
-      await updateProject(project);
+      if (changedSections.data)
+        await updateProjectData(
+          project._id,
+          project.description,
+          project.location,
+          project.year
+        );
+      // await updateProject(project);
+      if (changedSections.images) {
+        // check which images added and which deleted
+        // endpoint for addded imagess
+        // endpoint for deleted images
+      }
+      if (changedSections.video) {
+        // edit or delete video
+      }
       setEditingProjectId(null);
+      setChangedSections({ data: false, video: false, images: false });
     } catch (error) {
       console.error("Error updating project:", error);
     }
@@ -71,13 +107,9 @@ function EditProjects() {
     setEditingProjectId(projectId);
   };
 
-  const handleGoBack = () => {
-    navigate(-1);
-  };
-
+  // Images
   const addImage = (projectId: string, files: FileList) => {
     if (!files) return;
-
     const newImagePromises = Array.from(files).map((file) => {
       return new Promise<string>((resolve) => {
         const reader = new FileReader();
@@ -87,7 +119,6 @@ function EditProjects() {
         reader.readAsDataURL(file);
       });
     });
-
     Promise.all(newImagePromises).then((newImageUrls) => {
       setProjects((prevProjects) =>
         prevProjects.map((proj) =>
@@ -101,22 +132,25 @@ function EditProjects() {
             : proj
         )
       );
-
-      setDisplayImages((prevDisplayImages) => ({
-        ...prevDisplayImages,
-        [projectId]: [...(prevDisplayImages[projectId] || []), ...newImageUrls],
-      }));
+      setChangedSections((prev) => ({ ...prev, images: true }));
     });
   };
 
-  const uploadVideo = async (projectId: string, file: File) => {
+  // Video
+  const handleUploadVideo = (projectId: string, file: File) => {
     const newVideoUrl = URL.createObjectURL(file);
-    setVideoUrl(newVideoUrl);
+    console.log("Uploading video for project:", projectId);
+    console.log("New Video URL:", newVideoUrl);
+
+    // Update projects state with new video URL
     setProjects((prev) =>
       prev.map((proj) =>
         proj._id === projectId ? { ...proj, video: newVideoUrl } : proj
       )
     );
+
+    // Mark video section as changed
+    setChangedSections((prev) => ({ ...prev, video: true }));
   };
 
   const handleDeleteVideo = (projectId: string) => {
@@ -125,6 +159,7 @@ function EditProjects() {
         proj._id === projectId ? { ...proj, video: null } : proj
       )
     );
+    setChangedSections((prev) => ({ ...prev, video: true }));
   };
 
   if (loading) return <CircularProgress />;
@@ -137,7 +172,7 @@ function EditProjects() {
           className="mr-2 mb-2 cursor-pointer"
           onClick={handleGoBack}
         />
-        <Typography variant="h5" gutterBottom color="white">
+        <Typography variant="h6" gutterBottom color="white">
           Edit Projects
         </Typography>
       </div>
@@ -152,22 +187,25 @@ function EditProjects() {
               </Typography>
             </div>
           </AccordionSummary>
+
           <AccordionDetails>
             {editingProjectId === project._id ? (
               <div>
                 <TextField
                   label="Title"
                   defaultValue={project.title}
-                  onChange={(e) => (project.title = e.target.value)}
+                  onChange={(e) =>
+                    handleFieldChange("title", project, e.target.value)
+                  }
                   sx={{ marginRight: 2, marginBottom: 2 }}
                 />
                 <TextField
                   select
                   label="Year"
                   value={project.year}
-                  onChange={(e) => {
-                    project.year = Number(e.target.value);
-                  }}
+                  onChange={(e) =>
+                    handleFieldChange("year", project, Number(e.target.value))
+                  }
                   sx={{ marginRight: 2, marginBottom: 2 }}
                 >
                   {years.map((year) => (
@@ -179,23 +217,44 @@ function EditProjects() {
                 <TextField
                   label="Location"
                   defaultValue={project.location}
-                  onChange={(e) => (project.location = e.target.value)}
+                  onChange={(e) =>
+                    handleFieldChange("location", project, e.target.value)
+                  }
                   sx={{ marginBottom: 2 }}
                 />
                 <TextField
                   label="Description"
                   fullWidth
                   defaultValue={project.description}
-                  onChange={(e) => (project.description = e.target.value)}
+                  onChange={(e) =>
+                    handleFieldChange("description", project, e.target.value)
+                  }
                   multiline
-                  rows={4}
+                  rows={3}
                   sx={{ marginBottom: 2 }}
                 />
 
                 {/* Video Section */}
-                <Typography variant="h6" gutterBottom>
-                  Video
-                </Typography>
+                <div className="flex justify-between">
+                  <Typography variant="h6" gutterBottom>
+                    Video
+                  </Typography>
+                  <div>
+                    <Button
+                      onClick={() => handleDeleteVideo(project._id)}
+                      color="error"
+                      className="pr-2"
+                    >
+                      Delete Video
+                    </Button>
+                    <label htmlFor={`upload-video-${project._id}`}>
+                      <Button component="span" startIcon={<MdAdd />}>
+                        Upload New Video
+                      </Button>
+                    </label>
+                  </div>
+                </div>
+
                 {project.video ? (
                   <>
                     <video
@@ -206,37 +265,24 @@ function EditProjects() {
                       <source src={project.video} type="video/mp4" />
                       Your browser does not support the video tag.
                     </video>
-                    <Button
-                      onClick={() => handleDeleteVideo(project._id)}
-                      color="error"
-                      className="pr-2"
-                    >
-                      Delete Video
-                    </Button>
                   </>
                 ) : (
                   <span>No Video Uploaded</span>
                 )}
+
                 <input
                   accept="video/*"
-                  style={{ display: "none" }}
+                  hidden
                   id={`upload-video-${project._id}`}
                   type="file"
-                  onChange={(e) => {
-                    const file = e.target.files?.[0];
-                    if (file) {
-                      uploadVideo(project._id, file);
-                    }
-                  }}
+                  onChange={(e) =>
+                    e.target.files &&
+                    handleUploadVideo(project._id, e.target.files[0])
+                  }
                 />
-                <label htmlFor={`upload-video-${project._id}`}>
-                  <Button component="span" startIcon={<MdAdd />}>
-                    Upload New Video
-                  </Button>
-                </label>
 
                 {/* Images Section */}
-                <div className="flex justify-between">
+                <div className="flex justify-between pt-5">
                   <Typography variant="h6" gutterBottom>
                     Images
                   </Typography>
@@ -318,13 +364,17 @@ function EditProjects() {
               </div>
             )}
           </AccordionDetails>
+
           <AccordionActions>
             {editingProjectId ? (
               <>
                 <Button onClick={() => setEditingProjectId(null)} color="error">
                   Cancel
                 </Button>
-                <Button onClick={() => handleUpdateProject(project)}>
+                <Button
+                  onClick={() => handleUpdateProject(project)}
+                  disabled={isSaveDisabled}
+                >
                   Save Changes
                 </Button>
               </>

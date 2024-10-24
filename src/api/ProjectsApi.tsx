@@ -52,3 +52,10 @@ export const deleteProject = async (id: string) => {
     // throw new Error(error.response?.data?.message || 'Error deleting project');
   }
 };
+
+export const updateProjectData = async (
+  id: string,
+  description: string,
+  location: string,
+  year: number
+) => {};
