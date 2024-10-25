@@ -3,11 +3,20 @@ import ProjectCard from "../components/organisms/ProjectCard";
 import Stats from "../components/template/Stats";
 import { IProject } from "../interfaces/IProject";
 import { getProjects } from "../api/ProjectsApi";
+import { useSelector } from "react-redux";
+import { FaEdit } from "react-icons/fa";
+import ReButton from "../components/molecules/ReButton";
+import { useNavigate } from "react-router-dom";
 
 function OurProjects({ onVideoClick }: any) {
   const [projects, setProjects] = useState<IProject[]>([]);
   const [current, setCurrent] = useState(0); // Start with the first project
   const [activeImageIndex, setActiveImageIndex] = useState(0);
+
+  const [canEdit, setCanEdit] = useState(false);
+  const { userToken } = useSelector((state: any) => state.auth);
+
+  const navigate = useNavigate(); // Initialize the navigate function
 
   // Fetch projects data on component mount
   useEffect(() => {
@@ -23,6 +32,11 @@ function OurProjects({ onVideoClick }: any) {
 
     fetchData();
   }, []);
+
+  useEffect(() => {
+    if (userToken) setCanEdit(true);
+    else setCanEdit(false);
+  }, [userToken]);
 
   // Image slideshow logic for active card
   useEffect(() => {
@@ -47,9 +61,17 @@ function OurProjects({ onVideoClick }: any) {
     setActiveImageIndex(0); // Reset image index when moving to previous project
   };
 
+  const handleEditProjects = () => {
+    navigate("/360-production/admin/edit-projects"); // Navigate to the EditProjects page
+  };
+
   return (
     <>
-      <h1 className="section-title">OUR PROJECTS</h1>
+      <div className="flex justify-center mt-10">
+        <h1 className="section-title">OUR PROJECTS</h1>
+        {/* Edit Partners Button */}
+        {canEdit && <ReButton icon={<FaEdit />} onClick={handleEditProjects} />}
+      </div>
       <div className="relative w-full mx-auto overflow-hidden">
         <div className="flex justify-center items-center h-[450px]">
           {projects.map((project, index) => (
