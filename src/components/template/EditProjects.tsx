@@ -10,6 +10,7 @@ import {
   IconButton,
   AccordionActions,
   MenuItem,
+  InputAdornment,
 } from "@mui/material";
 import {
   getProjects,
@@ -23,7 +24,7 @@ import {
 } from "../../api/ProjectsApi";
 import { IProject } from "../../interfaces/IProject";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
-import { MdArrowBack, MdDelete, MdAdd } from "react-icons/md";
+import { MdArrowBack, MdDelete, MdAdd, MdSearch } from "react-icons/md";
 import { useNavigate } from "react-router-dom";
 import ReButton from "../molecules/ReButton";
 import AddProjectModal from "./AddProjectModal";
@@ -52,6 +53,15 @@ function EditProjects() {
 
   const isSaveDisabled =
     !changedSections.data && !changedSections.video && !changedSections.images;
+
+  const [searchQuery, setSearchQuery] = useState(""); // State for search query
+
+  const filteredProjects = projects.filter(
+    (project) =>
+      project.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      project.year.toString().includes(searchQuery) ||
+      project.location.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   useEffect(() => {
     const fetchProjects = async () => {
@@ -280,7 +290,23 @@ function EditProjects() {
           Edit Projects
         </Typography>
       </div>
-      <div className="flex justify-end pb-2">
+      <div className="flex justify-end mb-3">
+        <TextField
+          variant="outlined"
+          placeholder="Search by project name, year, or location"
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className="!mr-[10px] flex-grow bg-white  !rounded-lg"
+          slotProps={{
+            input: {
+              startAdornment: (
+                <InputAdornment position="start">
+                  <MdSearch />
+                </InputAdornment>
+              ),
+            },
+          }}
+        />
         <ReButton
           name="Add Project"
           onClick={handleOpenModal}
@@ -289,7 +315,7 @@ function EditProjects() {
           icon={<MdAdd />}
         />
       </div>
-      {projects.map((project) => (
+      {filteredProjects.map((project) => (
         <Accordion key={project._id}>
           <AccordionSummary expandIcon={<ExpandMoreIcon />}>
             <div className="flex justify-between w-full pr-2">
