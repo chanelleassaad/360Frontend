@@ -11,10 +11,7 @@ import {
   editPartner,
   deletePartner,
 } from "../api/PartnersApi";
-import {
-  getBoxDescription,
-  editBoxDescription
-} from "../api/TextBoxApi";
+import { getBoxDescription, editBoxDescription } from "../api/TextBoxApi";
 
 function AboutUs() {
   const [partners, setPartners] = useState<any[]>([]);
@@ -25,34 +22,22 @@ function AboutUs() {
   const [canEdit, setCanEdit] = useState(false);
   const { userToken } = useSelector((state: any) => state.auth);
 
-  const [text, setText] = useState(""); // Initially empty
-
-  // Fetch the box description from the API on component mount
-  useEffect(() => {
-    const fetchBoxDescription = async () => {
-      try {
-        const response = await getBoxDescription(); // Fetch the description from the backend
-        setText(response[0]?.description || ""); // Set the fetched description
-      } catch (error) {
-        console.error("Error fetching box description:", error);
-      }
-    };
-
-    fetchBoxDescription();
-  }, []);
+  const [text, setText] = useState("");
 
   // Fetch partners from the API
   useEffect(() => {
-    const fetchPartners = async () => {
+    const fetchData = async () => {
       try {
-        const data = await getPartners();
-        setPartners(data);
+        const partners = await getPartners();
+        const boxDescription = await getBoxDescription(); // Fetch the description from the backend
+        setPartners(partners);
+        setText(boxDescription[0]?.description || ""); // Set the fetched description
       } catch (error) {
         console.error("Error fetching partners:", error);
       }
     };
 
-    fetchPartners();
+    fetchData();
   }, []);
 
   useEffect(() => {
@@ -67,8 +52,7 @@ function AboutUs() {
 
   const handleSaveText = async () => {
     try {
-      const boxId = "670f803e64f382a10a619040"; // Assuming you have the box ID available (you can replace "1" with the actual ID)
-      await editBoxDescription(boxId, { description: text }); // Call the API to update the description
+      await editBoxDescription({ description: text });
       setIsEditing(false); // Exit editing mode
     } catch (error) {
       console.error("Error saving description:", error);
