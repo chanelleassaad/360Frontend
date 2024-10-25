@@ -9,41 +9,6 @@ export const getProjects = async () => {
   return response.data;
 };
 
-export const updateProject = async (project: any) => {
-  const formData = new FormData();
-  formData.append("title", project.title);
-  formData.append("location", project.location);
-  formData.append("year", project.year);
-  formData.append("description", project.description);
-
-  // Append images to FormData
-  // project.images.forEach((item: any) => formData.append("images", item));
-
-  formData.append("images", JSON.stringify(project.images));
-
-  // Append video if exists
-  formData.append("video", project.video);
-
-  console.log(formData.values);
-
-  try {
-    const response = await api.put(
-      `/projects/updateProject/${project._id}`,
-      formData,
-      {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      }
-    );
-
-    return response.data;
-  } catch (error) {
-    console.error("Error updating project:", error);
-    throw error; // Re-throw the error for further handling
-  }
-};
-
 export const deleteProject = async (id: string) => {
   try {
     const response = await api.delete(`/projects/deleteProject/${id}`);
@@ -67,11 +32,15 @@ export const uploadVideo = async (projectId: string, videoFile: File) => {
   const formData = new FormData();
   formData.append("video", videoFile);
   try {
-    const response = await api.put(`/projects/addVideo/${projectId}`, formData, {
-      headers: {
-        "Content-Type": "multipart/form-data",
-      },
-    });
+    const response = await api.put(
+      `/projects/addVideo/${projectId}`,
+      formData,
+      {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      }
+    );
     return response.data;
   } catch (error) {
     console.error("Error uploading video:", error);
@@ -100,7 +69,6 @@ export const editProjectData = async (
   }
 };
 
-// Function to add images to a project
 export const addImages = async (projectId: string, imageFiles: FileList) => {
   const formData = new FormData();
   Array.from(imageFiles).forEach((file) => {
@@ -108,11 +76,15 @@ export const addImages = async (projectId: string, imageFiles: FileList) => {
   });
 
   try {
-    const response = await api.put(`/projects/addImages/${projectId}`, formData, {
-      headers: {
-        "Content-Type": "multipart/form-data",
-      },
-    });
+    const response = await api.put(
+      `/projects/addImages/${projectId}`,
+      formData,
+      {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      }
+    );
     return response.data;
   } catch (error) {
     console.error("Error uploading images:", error);
@@ -120,7 +92,6 @@ export const addImages = async (projectId: string, imageFiles: FileList) => {
   }
 };
 
-// Function to delete specific images from a project
 export const deleteImages = async (projectId: string, imageNames: string[]) => {
   try {
     const response = await api.delete(`/projects/deleteImages/${projectId}`, {
@@ -131,6 +102,41 @@ export const deleteImages = async (projectId: string, imageNames: string[]) => {
     return response.data;
   } catch (error) {
     console.error("Error deleting images:", error);
+    throw error;
+  }
+};
+
+export const addProject = async (
+  title: string,
+  location: string,
+  year: number,
+  description: string,
+  video: File,
+  images: FileList
+) => {
+  try {
+    const formData = new FormData();
+
+    formData.append("title", title);
+    formData.append("location", location);
+    formData.append("year", year.toString());
+    formData.append("description", description);
+
+    Array.from(images).forEach((file) => {
+      formData.append("images", file);
+    });
+
+    formData.append("video", video);
+
+    const response = await api.post(`/projects/addProject`, formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
+
+    return response.data;
+  } catch (error) {
+    console.error("Error adding project data:", error);
     throw error;
   }
 };

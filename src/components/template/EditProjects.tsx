@@ -19,19 +19,24 @@ import {
   editProjectData,
   addImages,
   deleteImages,
+  addProject,
 } from "../../api/ProjectsApi";
 import { IProject } from "../../interfaces/IProject";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import { MdArrowBack, MdDelete, MdAdd } from "react-icons/md";
 import { useNavigate } from "react-router-dom";
-
+import ReButton from "../molecules/ReButton";
+import AddProjectModal from "./AddProjectModal";
 
 function EditProjects() {
   const [projects, setProjects] = useState<IProject[]>([]);
-  const [originalProjectData, setOriginalProjectData] = useState<IProject | null>(null);
+  const [originalProjectData, setOriginalProjectData] =
+    useState<IProject | null>(null);
   const [loading, setLoading] = useState(true);
   const [editingProjectId, setEditingProjectId] = useState<string | null>(null);
   const [imagesToDelete, setImagesToDelete] = useState<string[]>([]);
+
+  const [isModalOpen, setModalOpen] = useState(false); // State to control modal visibility
 
   const navigate = useNavigate();
 
@@ -100,44 +105,51 @@ function EditProjects() {
           project.description
         );
       }
-  
+
       if (changedSections.images && imagesToDelete.length > 0) {
         await deleteImages(project._id, imagesToDelete); // Call deleteImages API
       }
-  
+
       if (changedSections.video) {
         if (project.video === null) {
           // Delete the video if it's flagged for deletion
           await deleteVideo(project._id);
-        } else if (typeof project.video === "string" && project.video.startsWith("blob:")) {
-          const videoBlob = await fetch(project.video).then((res) => res.blob());
-          const videoFile = new File([videoBlob], project.videoName || "default_name.mp4", { type: videoBlob.type });
+        } else if (
+          typeof project.video === "string" &&
+          project.video.startsWith("blob:")
+        ) {
+          const videoBlob = await fetch(project.video).then((res) =>
+            res.blob()
+          );
+          const videoFile = new File(
+            [videoBlob],
+            project.videoName || "default_name.mp4",
+            { type: videoBlob.type }
+          );
           await uploadVideo(project._id, videoFile);
         }
       }
-  
+
       // Refresh the projects from MongoDB after saving changes
       const updatedProjects = await getProjects();
-      setProjects(updatedProjects);  // Update the frontend state with the latest projects from MongoDB
-  
+      setProjects(updatedProjects); // Update the frontend state with the latest projects from MongoDB
+
       setEditingProjectId(null);
       setChangedSections({ data: false, video: false, images: false });
     } catch (error) {
       console.error("Error updating project:", error);
     }
   };
-  
 
   const handleDeleteProject = async (projectId: string) => {
     try {
       await deleteProject(projectId);
-      const updatedProjects = await getProjects();  // Fetch updated data
-      setProjects(updatedProjects);  // Update frontend state
+      const updatedProjects = await getProjects(); // Fetch updated data
+      setProjects(updatedProjects); // Update frontend state
     } catch (error) {
       console.error("Error deleting project:", error);
     }
   };
-  
 
   const handleEditProject = (projectId: string) => {
     setEditingProjectId(projectId);
@@ -147,31 +159,27 @@ function EditProjects() {
     }
   };
 
-   // Handle marking an image for deletion
-   const markImageForDeletion = (projectId: string, imageUrl: string) => {
-    const project = projects.find((proj) => proj._id === projectId);
-  
-    // Check if there is only one image left, prevent deletion
-    if (project?.images.length === 1) {
-      alert("Each project must have at least one image.");
-      return; // Prevent deletion if there's only one image
-    }
-  
-    setImagesToDelete((prev) => [...prev, imageUrl]);
-    setProjects((prev) =>
-      prev.map((proj) =>
-        proj._id === projectId
-          ? {
-              ...proj,
-              images: proj.images.filter((img) => img !== imageUrl), // Temporarily remove image from the UI
-            }
-          : proj
-      )
-    );
-    setChangedSections((prev) => ({ ...prev, images: true }));
+  // Add Project
+  const handleOpenModal = () => {
+    setModalOpen(true);
   };
-  
 
+  const handleCloseModal = () => {
+    setModalOpen(false);
+  };
+
+  const handleAddProject = async (newProjectData: any) => {
+    const resp = await addProject(
+      newProjectData.title,
+      newProjectData.location,
+      newProjectData.year,
+      newProjectData.description,
+      newProjectData.video,
+      newProjectData.images
+    );
+
+    setProjects((prevProjects) => [...prevProjects, resp]);
+  };
 
   // Images
   const addImage = async (projectId: string, files: FileList) => {
@@ -190,9 +198,32 @@ function EditProjects() {
     }
   };
 
+  const markImageForDeletion = (projectId: string, imageUrl: string) => {
+    const project = projects.find((proj) => proj._id === projectId);
+
+    // Check if there is only one image left, prevent deletion
+    if (project?.images.length === 1) {
+      alert("Each project must have at least one image.");
+      return; // Prevent deletion if there's only one image
+    }
+
+    setImagesToDelete((prev) => [...prev, imageUrl]);
+    setProjects((prev) =>
+      prev.map((proj) =>
+        proj._id === projectId
+          ? {
+              ...proj,
+              images: proj.images.filter((img) => img !== imageUrl), // Temporarily remove image from the UI
+            }
+          : proj
+      )
+    );
+    setChangedSections((prev) => ({ ...prev, images: true }));
+  };
+
   // Video
   const handleUploadVideo = (projectId: string, file: File) => {
-    const newVideoUrl = URL.createObjectURL(file);  // Create a URL for the selected video
+    const newVideoUrl = URL.createObjectURL(file); // Create a URL for the selected video
     setProjects((prev) =>
       prev.map((proj) =>
         proj._id === projectId
@@ -202,9 +233,6 @@ function EditProjects() {
     );
     setChangedSections((prev) => ({ ...prev, video: true }));
   };
-  
-  
-
 
   const handleDeleteVideo = (projectId: string) => {
     setProjects((prev) =>
@@ -214,7 +242,6 @@ function EditProjects() {
     );
     setChangedSections((prev) => ({ ...prev, video: true }));
   };
-  
 
   if (loading) return <CircularProgress />;
 
@@ -230,7 +257,15 @@ function EditProjects() {
           Edit Projects
         </Typography>
       </div>
-
+      <div className="flex justify-end pb-2">
+        <ReButton
+          name="Add Project"
+          onClick={handleOpenModal}
+          color="white"
+          backgroundColor="#1976d2"
+          icon={<MdAdd />}
+        />
+      </div>
       {projects.map((project) => (
         <Accordion key={project._id}>
           <AccordionSummary expandIcon={<ExpandMoreIcon />}>
@@ -312,7 +347,7 @@ function EditProjects() {
                 {project.video ? (
                   <>
                     <video
-                      key={project.video} 
+                      key={project.video}
                       controls
                       width="100%"
                       style={{ maxWidth: "600px", marginBottom: "10px" }}
@@ -351,11 +386,7 @@ function EditProjects() {
                 <div className="flex space-x-2 mt-2">
                   {project.images.map((image, index) => (
                     <div key={index} className="relative">
-                      <img
-                        src={image}
-                        alt={`Project Image ${index}`}
-                        className="h-24 w-24 object-cover"
-                      />
+                      <img src={image} className="h-24 w-24 object-cover" />
                       <IconButton
                         size="small"
                         onClick={() => markImageForDeletion(project._id, image)}
@@ -436,6 +467,12 @@ function EditProjects() {
           </AccordionActions>
         </Accordion>
       ))}
+
+      <AddProjectModal
+        isOpen={isModalOpen}
+        onClose={handleCloseModal}
+        onAddProject={handleAddProject}
+      />
     </div>
   );
 }
