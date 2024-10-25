@@ -409,7 +409,11 @@ function EditProjects() {
                 <div className="flex space-x-2 mt-2">
                   {project.images.map((image, index) => (
                     <div key={index} className="relative">
-                      <img src={image} className="h-24 w-24 object-cover" />
+                      <img
+                        src={image}
+                        alt=""
+                        className="h-24 w-24 object-cover"
+                      />
                       <IconButton
                         size="small"
                         onClick={() => markImageForDeletion(project._id, image)}
@@ -452,7 +456,7 @@ function EditProjects() {
                     <img
                       key={index}
                       src={image}
-                      alt={`Project Image ${index}`}
+                      alt={`Project ${index}`}
                       className="h-24 w-24 object-cover"
                     />
                   ))}
