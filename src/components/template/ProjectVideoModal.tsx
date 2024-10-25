@@ -20,7 +20,7 @@ const ProjectVideoModal = ({ project, isOpen, onClose }: any) => {
           <div className="flex h-full flex-col">
             <div className="flex-shrink-0 p-4 bg-gray-800 text-white flex justify-between items-center">
               <DialogTitle as="h3" className="text-lg font-semibold">
-                {project.title} - Video
+                {project.title}
               </DialogTitle>
               <button onClick={onClose}>
                 <IoClose />

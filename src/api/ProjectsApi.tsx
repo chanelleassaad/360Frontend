@@ -69,7 +69,7 @@ export const editProjectData = async (
   }
 };
 
-export const addImages = async (projectId: string, imageFiles: FileList) => {
+export const addImages = async (projectId: string, imageFiles: any[]) => {
   const formData = new FormData();
   Array.from(imageFiles).forEach((file) => {
     formData.append("images", file); // Append each image to the FormData object

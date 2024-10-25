@@ -35,6 +35,7 @@ function EditProjects() {
   const [loading, setLoading] = useState(true);
   const [editingProjectId, setEditingProjectId] = useState<string | null>(null);
   const [imagesToDelete, setImagesToDelete] = useState<string[]>([]);
+  const [imagesToAdd, setImagesToAdd] = useState<File[]>([]);
 
   const [isModalOpen, setModalOpen] = useState(false); // State to control modal visibility
 
@@ -107,7 +108,10 @@ function EditProjects() {
       }
 
       if (changedSections.images && imagesToDelete.length > 0) {
-        await deleteImages(project._id, imagesToDelete); // Call deleteImages API
+        await deleteImages(project._id, imagesToDelete);
+      }
+      if (changedSections.images && imagesToAdd.length > 0) {
+        await addImages(project._id, imagesToAdd);
       }
 
       if (changedSections.video) {
@@ -182,20 +186,39 @@ function EditProjects() {
   };
 
   // Images
-  const addImage = async (projectId: string, files: FileList) => {
-    if (!files) return;
+  const addImage = (projectId: string, files: FileList) => {
+    if (!files || files.length === 0) return;
 
-    try {
-      // Call the addImages endpoint with the projectId and selected image files
-      await addImages(projectId, files);
+    const newImagePromises = Array.from(files).map((file) => {
+      return new Promise<string>((resolve) => {
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          resolve(reader.result as string);
+        };
+        reader.readAsDataURL(file);
+      });
+    });
 
-      // Fetch updated projects after adding images
-      const updatedProjects = await getProjects();
-      setProjects(updatedProjects); // Update frontend state with the latest projects
+    Promise.all(newImagePromises).then((newImageUrls) => {
+      setProjects((prevProjects) =>
+        prevProjects.map((proj) =>
+          proj._id === projectId
+            ? {
+                ...proj,
+                images: Array.isArray(proj.images)
+                  ? [...proj.images, ...newImageUrls]
+                  : newImageUrls,
+              }
+            : proj
+        )
+      );
+
+      // Update imagesToAdd with new File objects
+      setImagesToAdd((prev) => [...prev, ...Array.from(files)]);
+
+      // Mark the images section as changed
       setChangedSections((prev) => ({ ...prev, images: true }));
-    } catch (error) {
-      console.error("Error uploading images:", error);
-    }
+    });
   };
 
   const markImageForDeletion = (projectId: string, imageUrl: string) => {

@@ -3,6 +3,7 @@ import { MdAdd, MdClose, MdDelete } from "react-icons/md";
 import ReButton from "../molecules/ReButton";
 import { IPartner } from "../../interfaces/IPartner";
 import { IStat } from "../../interfaces/IStat";
+import { Button } from "@mui/material";
 
 interface EditModalProps {
   isOpen: boolean;
@@ -33,9 +34,11 @@ const EditModal = ({
   const [imagePreviews, setImagePreviews] = useState<{ [key: number]: string }>(
     {}
   );
+  const [isSaveDisabled, setIsSaveDisabled] = useState(true);
 
   // Prevent background scroll when modal is open
   useEffect(() => {
+    setIsSaveDisabled(true);
     if (isOpen) {
       document.body.style.overflow = "hidden";
     } else {
@@ -68,6 +71,7 @@ const EditModal = ({
       };
       reader.readAsDataURL(file);
     }
+    setIsSaveDisabled(false);
   };
 
   // Define input fields based on the type (partners or stats)
@@ -159,18 +163,21 @@ const EditModal = ({
                         <textarea
                           className="text-base p-2 rounded border"
                           value={(item as any)[field] || ""}
-                          onChange={(e) =>
-                            onChange(item._id, field, e.target.value)
-                          }
+                          onChange={(e) => {
+                            setIsSaveDisabled(false);
+                            onChange(item._id, field, e.target.value);
+                          }}
                           rows={1} // Adjust the number of rows as needed
                         />
                       ) : (
                         <input
+                          required
                           className="text-base p-2 rounded border "
                           value={(item as any)[field] || ""}
-                          onChange={(e) =>
-                            onChange(item._id, field, e.target.value)
-                          }
+                          onChange={(e) => {
+                            setIsSaveDisabled(false);
+                            onChange(item._id, field, e.target.value);
+                          }}
                         />
                       )}
                     </td>
@@ -180,7 +187,10 @@ const EditModal = ({
                       icon={
                         <MdDelete className="text-red-500 hover:text-red-700" />
                       }
-                      onClick={() => onDelete(item._id)}
+                      onClick={() => {
+                        setIsSaveDisabled(false);
+                        onDelete(item._id);
+                      }}
                     />
                   </td>
                 </tr>
@@ -196,12 +206,9 @@ const EditModal = ({
             name={type === "partners" ? "Add Partner" : "Add Stat"}
           />
           <div className="flex space-x-4">
-            <ReButton
-              name={loading ? "Saving..." : "Save Changes"}
-              onClick={handleSave}
-              disabled={loading}
-              backgroundColor="green"
-            />
+            <Button onClick={handleSave} disabled={loading || isSaveDisabled}>
+              {loading ? "Saving..." : "Save Changes"}
+            </Button>
           </div>
         </div>
       </div>

@@ -1,3 +1,5 @@
+import { Button } from "@mui/material";
+
 interface IButtonProps {
   name?: string;
   backgroundColor?: string;
@@ -10,13 +12,13 @@ interface IButtonProps {
 const ReButton = ({
   name,
   backgroundColor,
-  color,
+  color = "white",
   icon,
   onClick,
   disabled,
 }: IButtonProps) => {
   return (
-    <button
+    <Button
       className="flex items-center justify-center py-2 px-4 rounded text-white font-bold"
       style={{ backgroundColor, color }}
       onClick={onClick}
@@ -24,7 +26,7 @@ const ReButton = ({
     >
       {icon && <span className="mr-2">{icon}</span>}
       {name}
-    </button>
+    </Button>
   );
 };
 

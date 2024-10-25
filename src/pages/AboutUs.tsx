@@ -24,7 +24,6 @@ function AboutUs() {
 
   const [text, setText] = useState("");
 
-  // Fetch partners from the API
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -45,7 +44,7 @@ function AboutUs() {
     else setCanEdit(false);
   }, [userToken]);
 
-  // Toggle text edit mode
+  // Decription Text
   const handleEditText = () => {
     setIsEditing(!isEditing);
   };
@@ -59,7 +58,7 @@ function AboutUs() {
     }
   };
 
-  // Edit partners - open modal with current partners
+  // Partners
   const handleEditPartners = () => {
     setEditingPartners([...partners]);
     setIsPartnerModalOpen(true);
@@ -68,14 +67,12 @@ function AboutUs() {
   const handleSavePartners = async () => {
     // Check if any partner has missing fields
     const hasMissingFields = editingPartners.some(
-      (partner) => !partner.fullName || !partner.description
+      (partner) => !partner.fullName || !partner.description || !partner.quote
     );
 
     if (hasMissingFields) {
-      alert(
-        "⚠️ Missing Fields\n\nPlease fill in all required fields (full name and description)."
-      );
-      return; // Stop execution if there are missing fields
+      alert("⚠️ Missing Fields\n\nPlease fill in all fields");
+      return;
     }
 
     // Find new partners (those that don't exist in the original partners array)
@@ -158,7 +155,6 @@ function AboutUs() {
     }
   };
 
-  // Add a new partner (in UI and later to API)
   const handleAddPartner = () => {
     const newPartner: IPartner = {
       _id: Math.random(), // Temporary ID for the UI
@@ -170,19 +166,10 @@ function AboutUs() {
     setEditingPartners([...editingPartners, newPartner]);
   };
 
-  // Delete partner from the UI and API
   const handleDeletePartner = async (id: number) => {
-    try {
-      // if (id) await deletePartner(id);
-      setEditingPartners(
-        editingPartners.filter((partner) => partner._id !== id)
-      );
-    } catch (error) {
-      console.error("Error deleting partner:", error);
-    }
+    setEditingPartners(editingPartners.filter((partner) => partner._id !== id));
   };
 
-  // Handle change in partner data in the modal
   const handlePartnerChange = (id: number, field: string, value: any) => {
     const updatedPartners = editingPartners.map((partner) =>
       partner._id === id ? { ...partner, [field]: value } : partner
