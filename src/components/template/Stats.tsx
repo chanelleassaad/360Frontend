@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import colors from "../../colors";
 import { useSelector } from "react-redux";
 import { IStat } from "../../interfaces/IStat";
-import EditModal from "./EditModal";
+import EditModal from "./modals/EditModal";
 import ReButton from "../molecules/ReButton";
 import { FaEdit } from "react-icons/fa";
 import { addStat, deleteStat, editStat, getStats } from "../../api/StatsApi";

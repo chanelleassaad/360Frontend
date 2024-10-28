@@ -1,9 +1,11 @@
 import { useEffect, useState } from "react";
 import { MdAdd, MdClose, MdDelete } from "react-icons/md";
-import ReButton from "../molecules/ReButton";
-import { IPartner } from "../../interfaces/IPartner";
-import { IStat } from "../../interfaces/IStat";
 import { Button } from "@mui/material";
+import { IPartner } from "../../../interfaces/IPartner";
+import { IStat } from "../../../interfaces/IStat";
+import ReButton from "../../molecules/ReButton";
+import DeleteModal from "./DeleteModal";
+import React from "react";
 
 interface EditModalProps {
   isOpen: boolean;
@@ -35,6 +37,8 @@ const EditModal = ({
     {}
   );
   const [isSaveDisabled, setIsSaveDisabled] = useState(true);
+  const [isOpenDelete, setIsOpenDelete] = useState(false);
+  const [deleteItemId, setDeleteItemId] = useState<number | null>(null); // State to keep track of the item to delete
 
   // Prevent background scroll when modal is open
   useEffect(() => {
@@ -135,65 +139,79 @@ const EditModal = ({
             </thead>
             <tbody>
               {editingItems.map((item) => (
-                <tr key={item._id} className="hover:bg-gray-100">
-                  {inputFields.map(({ field }) => (
-                    <td key={field as string} className="p-2 border-b">
-                      {field === "imageUrl" ? (
-                        <div className="flex flex-col items-center space-y-2">
-                          <input
-                            type="file"
-                            accept="image/*"
-                            className="text-base p-2 rounded"
-                            onChange={(e) => handleImageChange(item._id, e)}
-                          />
-                          {/* Show previously uploaded image or the newly selected image */}
-                          {(imagePreviews[item._id] ||
-                            (item as any).imageUrl) && (
-                            <img
-                              src={
-                                imagePreviews[item._id] ||
-                                (item as any).imageUrl
-                              }
-                              alt="Preview"
-                              className="w-20 h-20 object-cover border rounded-md"
+                <React.Fragment key={item._id}>
+                  <tr className="hover:bg-gray-100">
+                    {inputFields.map(({ field }) => (
+                      <td key={field as string} className="p-2 border-b">
+                        {field === "imageUrl" ? (
+                          <div className="flex flex-col items-center space-y-2">
+                            <input
+                              type="file"
+                              accept="image/*"
+                              className="text-base p-2 rounded"
+                              onChange={(e) => handleImageChange(item._id, e)}
                             />
-                          )}
-                        </div>
-                      ) : field === "description" ? (
-                        <textarea
-                          className="text-base p-2 rounded border"
-                          value={(item as any)[field] || ""}
-                          onChange={(e) => {
-                            setIsSaveDisabled(false);
-                            onChange(item._id, field, e.target.value);
-                          }}
-                          rows={1} // Adjust the number of rows as needed
-                        />
-                      ) : (
-                        <input
-                          required
-                          className="text-base p-2 rounded border "
-                          value={(item as any)[field] || ""}
-                          onChange={(e) => {
-                            setIsSaveDisabled(false);
-                            onChange(item._id, field, e.target.value);
-                          }}
-                        />
-                      )}
+                            {/* Show previously uploaded image or the newly selected image */}
+                            {(imagePreviews[item._id] ||
+                              (item as any).imageUrl) && (
+                              <img
+                                src={
+                                  imagePreviews[item._id] ||
+                                  (item as any).imageUrl
+                                }
+                                alt="Preview"
+                                className="w-20 h-20 object-cover border rounded-md"
+                              />
+                            )}
+                          </div>
+                        ) : field === "description" ? (
+                          <textarea
+                            className="text-base p-2 rounded border"
+                            value={(item as any)[field] || ""}
+                            onChange={(e) => {
+                              setIsSaveDisabled(false);
+                              onChange(item._id, field, e.target.value);
+                            }}
+                            rows={1} // Adjust the number of rows as needed
+                          />
+                        ) : (
+                          <input
+                            required
+                            className="text-base p-2 rounded border "
+                            value={(item as any)[field] || ""}
+                            onChange={(e) => {
+                              setIsSaveDisabled(false);
+                              onChange(item._id, field, e.target.value);
+                            }}
+                          />
+                        )}
+                      </td>
+                    ))}
+                    <td className="p-2 border-b">
+                      <ReButton
+                        icon={
+                          <MdDelete className="text-red-500 hover:text-red-700" />
+                        }
+                        onClick={() => {
+                          setIsSaveDisabled(false);
+                          setDeleteItemId(item._id); // Set the item to delete
+                          setIsOpenDelete(true);
+                        }}
+                      />
                     </td>
-                  ))}
-                  <td className="p-2 border-b">
-                    <ReButton
-                      icon={
-                        <MdDelete className="text-red-500 hover:text-red-700" />
+                  </tr>
+                  <DeleteModal
+                    isOpen={isOpenDelete}
+                    onClose={() => setIsOpenDelete(false)}
+                    onComfirmDelete={() => {
+                      if (deleteItemId !== null) {
+                        onDelete(deleteItemId); // Use the stored ID
                       }
-                      onClick={() => {
-                        setIsSaveDisabled(false);
-                        onDelete(item._id);
-                      }}
-                    />
-                  </td>
-                </tr>
+                      setIsOpenDelete(false);
+                    }}
+                    deleteTitle={type === "partners" ? "Partner" : "Stat"}
+                  />
+                </React.Fragment>
               ))}
             </tbody>
           </table>

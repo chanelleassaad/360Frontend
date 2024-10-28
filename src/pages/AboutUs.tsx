@@ -3,7 +3,7 @@ import PartnerCard from "../components/organisms/PartnerCard";
 import { useSelector } from "react-redux";
 import ReButton from "../components/molecules/ReButton";
 import { FaEdit } from "react-icons/fa";
-import EditModal from "../components/template/EditModal";
+import EditModal from "../components/template/modals/EditModal";
 import { IPartner } from "../interfaces/IPartner";
 import {
   getPartners,

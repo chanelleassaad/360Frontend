@@ -6,7 +6,7 @@ import OurProjects from "./pages/OurProjects";
 import ContactUs from "./pages/ContactUs";
 import Footer from "./components/organisms/Footer";
 import Header from "./components/organisms/Header";
-import ProjectVideoModal from "./components/template/ProjectVideoModal";
+import ProjectVideoModal from "./components/template/modals/ProjectVideoModal";
 import { useState } from "react";
 
 function App() {
