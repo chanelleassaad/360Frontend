@@ -22,7 +22,7 @@ export default function Login() {
     };
 
     try {
-      const res = await loginUser(userData); // Call your login API
+      await loginUser(userData);
       await signIn(userData.username);
       setErrorMessage("");
       navigate("/");

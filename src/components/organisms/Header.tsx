@@ -1,4 +1,4 @@
-import { useState, useContext } from "react";
+import { useState } from "react";
 import { Dialog, DialogPanel } from "@headlessui/react";
 import { Bars3Icon, XMarkIcon } from "@heroicons/react/24/outline";
 import logo from "../../assets/360logo.png";
@@ -40,10 +40,7 @@ export default function Header() {
       >
         {/* Logo */}
         <div className="flex lg:flex-1">
-          <a href="#" className="-m-1 p-1">
-            <span className="sr-only">Your Company</span>
-            <img alt="360 Logo" src={logo} className="h-12 w-auto lg:h-20" />
-          </a>
+          <img alt="360 Logo" src={logo} className="h-12 w-auto lg:h-20" />
         </div>
 
         {/* Mobile Menu Button */}
@@ -90,10 +87,7 @@ export default function Header() {
         <div className="fixed inset-0 z-10 bg-black opacity-30" />
         <DialogPanel className="fixed inset-y-0 right-0 z-10 w-full overflow-y-auto bg-white px-3 sm:max-w-sm sm:ring-1 sm:ring-gray-900/10">
           <div className="flex items-center justify-between">
-            <a href="#" className="-m-1.5 p-1.5">
-              <span className="sr-only">Your Company</span>
-              <img alt="360 Logo" src={logo} className="h-20 w-auto" />
-            </a>
+            <img alt="360 Logo" src={logo} className="h-20 w-auto" />
             <button
               type="button"
               onClick={() => setMobileMenuOpen(false)}

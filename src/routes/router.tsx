@@ -1,4 +1,10 @@
-import { Route, Routes, useNavigate, useLocation } from "react-router-dom";
+import {
+  Route,
+  Routes,
+  useNavigate,
+  useLocation,
+  Navigate,
+} from "react-router-dom";
 import LoginPage from "../pages/LoginPage";
 import { useEffect } from "react";
 import { useSelector } from "react-redux";
@@ -17,12 +23,15 @@ const Router = () => {
     if (!userToken && location.pathname !== "/360-production/admin") {
       navigate("/360-production", { replace: true });
     }
-  }, [userToken, isLoading, location.pathname]);
+  }, [userToken]);
 
   return (
     <Routes>
       {/* Default Route */}
-      <Route path="/" element={<App />} />
+      <Route
+        path="*"
+        element={<Navigate to="/360-production" replace={true} />}
+      />
 
       {/* Public routes */}
       <Route path="/360-production" element={<App />} />
