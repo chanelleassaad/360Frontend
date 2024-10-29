@@ -1,4 +1,5 @@
-import { Box, Button, Modal, Typography } from "@mui/material";
+import { Box, Button, IconButton, Modal, Typography } from "@mui/material";
+import CloseIcon from "@mui/icons-material/Close";
 
 function DeleteModal({
   isOpen,
@@ -24,30 +25,37 @@ function DeleteModal({
           top: "50%",
           left: "50%",
           transform: "translate(-50%, -50%)",
-          width: 300,
           bgcolor: "background.paper",
           boxShadow: 24,
-          p: 4,
+          minWidth: "30%",
+          maxWidth: "90%",
           borderRadius: 2,
-          textAlign: "center",
         }}
       >
-        <Typography variant="h6" id="child-modal-title" mb={2}>
-          Delete {deleteTitle}?
+        <Box
+          display="flex"
+          justifyContent="space-between"
+          alignItems="center"
+          sx={{ bgcolor: "#f0f0f0", p: 1, borderRadius: 2, m: 0 }} // Light gray background for header
+        >
+          <Typography id="child-modal-title" sx={{ fontWeight: "bold" }}>
+            Delete {deleteTitle}?
+          </Typography>
+
+          <IconButton onClick={onClose}>
+            <CloseIcon fontSize="small" />
+          </IconButton>
+        </Box>
+        <Typography variant="body2" id="child-modal-description" m={2}>
+          This can't be undone.
         </Typography>
-        <Typography variant="body2" id="child-modal-description" mb={3}>
-          This action cannot be undone.
-        </Typography>
-        <Box display="flex" justifyContent="space-between">
-          <Button variant="outlined" onClick={onClose} sx={{ width: "45%" }}>
+        <Box sx={{ borderTop: "1px solid #e0e0e0", mt: 2 }} />{" "}
+        {/* Line above buttons */}
+        <Box display="flex" justifyContent="flex-end" m={1}>
+          <Button variant="outlined" onClick={onClose} sx={{ mr: 1 }}>
             Cancel
           </Button>
-          <Button
-            variant="contained"
-            color="error"
-            onClick={onComfirmDelete}
-            sx={{ width: "45%" }}
-          >
+          <Button variant="contained" color="error" onClick={onComfirmDelete}>
             Delete
           </Button>
         </Box>

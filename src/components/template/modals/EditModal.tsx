@@ -13,6 +13,7 @@ interface EditModalProps {
   editingItems: (IStat | IPartner)[];
   onSave: (items: (IStat | IPartner)[]) => Promise<void>;
   onDelete: (id: number) => void;
+  errorMessage?: string;
   onAdd: () => void;
   type: "partners" | "stats";
   onChange: (
@@ -31,6 +32,7 @@ const EditModal = ({
   onAdd,
   type,
   onChange,
+  errorMessage = undefined,
 }: EditModalProps) => {
   const [loading, setLoading] = useState(false);
   const [imagePreviews, setImagePreviews] = useState<{ [key: number]: string }>(
@@ -38,7 +40,7 @@ const EditModal = ({
   );
   const [isSaveDisabled, setIsSaveDisabled] = useState(true);
   const [isOpenDelete, setIsOpenDelete] = useState(false);
-  const [deleteItemId, setDeleteItemId] = useState<number | null>(null); // State to keep track of the item to delete
+  const [deleteItem, setDeleteItem] = useState<any | null>(null);
 
   // Prevent background scroll when modal is open
   useEffect(() => {
@@ -79,21 +81,26 @@ const EditModal = ({
   };
 
   // Define input fields based on the type (partners or stats)
-  const inputFields =
+  const inputFields: {
+    placeholder: string;
+    field: keyof IPartner | keyof IStat;
+    required?: boolean;
+  }[] =
     type === "partners"
       ? [
-          { placeholder: "Partner Name", field: "fullName" as keyof IPartner },
-          { placeholder: "Image URL", field: "imageUrl" as keyof IPartner },
-          { placeholder: "Quote", field: "quote" as keyof IPartner },
-          {
-            placeholder: "Description",
-            field: "description" as keyof IPartner,
-          },
+          { placeholder: "Partner Name", field: "fullName", required: true },
+          { placeholder: "Image URL", field: "imageUrl", required: true },
+          { placeholder: "Quote", field: "quote" },
+          { placeholder: "Description", field: "description", required: true },
         ]
       : [
-          { placeholder: "Title", field: "title" as keyof IStat },
-          { placeholder: "Description", field: "description" as keyof IStat },
+          { placeholder: "Title", field: "title", required: true },
+          { placeholder: "Description", field: "description", required: true },
         ];
+
+  function isPartner(item?: IStat | IPartner): item is IPartner {
+    return type === "partners";
+  }
 
   // Handle overlay click to close modal
   const handleOverlayClick = (e: React.MouseEvent) => {
@@ -118,20 +125,26 @@ const EditModal = ({
       onClick={handleOverlayClick}
     >
       <div className="bg-white p-6 rounded-lg max-w-[90vw] relative ">
-        <div className="flex justify-between">
+        <div className="flex justify-between items-starts">
           <h2 className="text-xl font-bold mb-4 text-center">
-            Edit {type === "partners" ? "Partners" : "Stats"}
+            Edit {isPartner() ? "Partners" : "Stats"}
           </h2>
-          <ReButton icon={<MdClose />} onClick={onClose} color="black" />
+          <Button onClick={onClose}>
+            <MdClose className="text-black" />
+          </Button>
         </div>
 
         <div className="overflow-auto max-h-[60vh]">
           <table className="min-w-full table-auto border-collapse">
             <thead>
               <tr>
-                {inputFields.map(({ placeholder }) => (
-                  <th key={placeholder} className="p-2 border-b text-left">
-                    {placeholder}
+                {inputFields.map((input) => (
+                  <th
+                    key={input.placeholder}
+                    className="p-2 border-b text-left"
+                  >
+                    {input.placeholder}
+                    {input.required && <span className="text-red-500"> *</span>}
                   </th>
                 ))}
                 <th className="p-2 border-b"></th>
@@ -194,36 +207,44 @@ const EditModal = ({
                         }
                         onClick={() => {
                           setIsSaveDisabled(false);
-                          setDeleteItemId(item._id); // Set the item to delete
+                          setDeleteItem(item);
                           setIsOpenDelete(true);
                         }}
                       />
                     </td>
                   </tr>
-                  <DeleteModal
-                    isOpen={isOpenDelete}
-                    onClose={() => setIsOpenDelete(false)}
-                    onComfirmDelete={() => {
-                      if (deleteItemId !== null) {
-                        onDelete(deleteItemId); // Use the stored ID
-                      }
-                      setIsOpenDelete(false);
-                    }}
-                    deleteTitle={type === "partners" ? "Partner" : "Stat"}
-                  />
                 </React.Fragment>
               ))}
             </tbody>
           </table>
         </div>
+        <DeleteModal
+          key={deleteItem?._id} // Optional: Use key to help React identify changes
+          isOpen={isOpenDelete}
+          onClose={() => {
+            setIsOpenDelete(false);
+            setDeleteItem(null); // Reset delete item on close
+          }}
+          onComfirmDelete={() => {
+            if (deleteItem) {
+              onDelete(deleteItem._id);
+            }
+            setIsOpenDelete(false);
+            setDeleteItem(null); // Reset delete item after confirming
+          }}
+          deleteTitle={isPartner() ? "Partner " + deleteItem?.fullName : "Stat"}
+        />
         <div className="flex justify-between mt-4">
           <ReButton
             onClick={onAdd}
             icon={<MdAdd />}
             backgroundColor="black"
-            name={type === "partners" ? "Add Partner" : "Add Stat"}
+            name={isPartner() ? "Add Partner" : "Add Stat"}
           />
           <div className="flex space-x-4">
+            {errorMessage && (
+              <p className="text-red-500  mt-1">⚠️ {errorMessage}</p>
+            )}
             <Button onClick={handleSave} disabled={loading || isSaveDisabled}>
               {loading ? "Saving..." : "Save Changes"}
             </Button>

@@ -22,9 +22,8 @@ function PartnerCard({
   };
 
   return (
-    <div className="bg-white w-64 h-72 p-3 rounded-lg shadow-md lg:h-96">
-      {/* Container with perspective to create 3D flip effect */}
-      <div className="relative" style={{ perspective: "1000px" }}>
+    <div className="bg-white w-64 p-3 rounded-lg shadow-md ">
+      <div className="relative">
         <div
           className={`relative transition-transform duration-700 flex justify-center h-48 lg:h-72 `}
           style={{

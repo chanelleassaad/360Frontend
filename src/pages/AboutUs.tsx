@@ -23,6 +23,7 @@ function AboutUs() {
   const { userToken } = useSelector((state: any) => state.auth);
 
   const [text, setText] = useState("");
+  const [errorMessage, setErrorMessage] = useState<string | undefined>();
 
   useEffect(() => {
     const fetchData = async () => {
@@ -65,13 +66,14 @@ function AboutUs() {
   };
 
   const handleSavePartners = async () => {
+    setErrorMessage(undefined);
     // Check if any partner has missing fields
     const hasMissingFields = editingPartners.some(
-      (partner) => !partner.fullName || !partner.description || !partner.quote
+      (partner) => !partner.fullName || !partner.description
     );
 
     if (hasMissingFields) {
-      alert("⚠️ Missing Fields\n\nPlease fill in all fields");
+      setErrorMessage("Missing Fields. Please fill in all required fields");
       return;
     }
 
@@ -150,8 +152,11 @@ function AboutUs() {
       });
 
       setIsPartnerModalOpen(false);
-    } catch (error) {
-      console.error("Error saving partners:", error);
+    } catch (error: any) {
+      // Accessing error response based on typical structure
+      const message =
+        error.response?.data?.message || "An unknown error occurred";
+      setErrorMessage(message);
     }
   };
 
@@ -178,21 +183,24 @@ function AboutUs() {
   };
 
   return (
-    <div>
-      <div className="relative bg-red-600 text-white p-6 rounded-lg shadow-lg">
+    <>
+      <div className="relative bg-red-600 text-white p-2 rounded-lg shadow-lg">
         {isEditing ? (
           <textarea
             className="w-full bg-red-500 text-white p-2 rounded"
             value={text}
             onChange={(e) => setText(e.target.value)}
-            rows={5}
+            style={{ overflow: "hidden" }}
+            rows={3}
           />
         ) : (
-          <p className="text-center">{text}</p>
+          <p className="text-center" style={{ whiteSpace: "pre-line" }}>
+            {text}
+          </p>
         )}
 
         {canEdit && (
-          <div className="flex justify-end mt-4">
+          <div className="flex justify-end m-0">
             {isEditing ? (
               <>
                 <ReButton onClick={handleEditText} name="Cancel" />
@@ -203,7 +211,11 @@ function AboutUs() {
                 />
               </>
             ) : (
-              <ReButton icon={<FaEdit />} onClick={handleEditText} />
+              <ReButton
+                icon={<FaEdit />}
+                onClick={handleEditText}
+                name="Text"
+              />
             )}
           </div>
         )}
@@ -216,11 +228,11 @@ function AboutUs() {
         {canEdit && <ReButton icon={<FaEdit />} onClick={handleEditPartners} />}
       </div>
 
-      <div className="flex flex-wrap justify-center items-center ">
+      <div className="flex flex-wrap justify-center ">
         {partners.map((partner, index) => (
           <div
             key={index}
-            className="max-w-sm w-full pr-0 md:w-1/3 lg:w-1/4 my-2 md:mr-10 lg:mr-0 lg:pr-3 flex justify-center"
+            className="flex justify-center max-w-sm w-full md:w-1/3 lg:w-1/4 my-2 p-2"
           >
             <PartnerCard
               name={partner.fullName}
@@ -243,9 +255,10 @@ function AboutUs() {
           onAdd={handleAddPartner}
           type="partners"
           onChange={handlePartnerChange}
+          errorMessage={errorMessage}
         />
       )}
-    </div>
+    </>
   );
 }
 
