@@ -21,11 +21,11 @@ const ProjectCard = ({
   let cardClasses = "card transition-transform duration-500 ease-in-out";
 
   if (isActive) {
-    cardClasses += "active transform scale-100 opacity-100 z-10";
+    cardClasses += " active transform scale-100 opacity-100 z-10";
   } else if (isLeft) {
-    cardClasses += "left transform -translate-x-full scale-90 opacity-50";
+    cardClasses += " left transform -translate-x-full scale-90 opacity-50";
   } else if (isRight) {
-    cardClasses += "right transform translate-x-full scale-90 opacity-50";
+    cardClasses += " right transform translate-x-full scale-90 opacity-50";
   }
 
   const handleVideoClick = () => {
