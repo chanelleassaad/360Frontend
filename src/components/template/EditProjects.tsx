@@ -48,6 +48,8 @@ function EditProjects() {
   const [imageToDelete, setImageToDelete] = useState(null);
   const [projectToDelete, setProjectToDelete] = useState<any>(null);
 
+  const [isNewProjectSaving, setIsNewProjectSaving] = useState(false);
+
   const navigate = useNavigate();
 
   const currentYear = new Date().getFullYear();
@@ -201,16 +203,21 @@ function EditProjects() {
   };
 
   const handleAddProject = async (newProjectData: any) => {
-    const resp = await addProject(
-      newProjectData.title,
-      newProjectData.location,
-      newProjectData.year,
-      newProjectData.description,
-      newProjectData.video,
-      newProjectData.images
-    );
+    setIsNewProjectSaving(true);
+    try {
+      const resp = await addProject(
+        newProjectData.title,
+        newProjectData.location,
+        newProjectData.year,
+        newProjectData.description,
+        newProjectData.video,
+        newProjectData.images
+      );
 
-    setProjects((prevProjects) => [...prevProjects, resp]);
+      setProjects((prevProjects) => [...prevProjects, resp]);
+    } finally {
+      setIsNewProjectSaving(false);
+    }
   };
 
   // Images
@@ -346,7 +353,6 @@ function EditProjects() {
             <ReButton
               name="Add Project"
               onClick={handleOpenAddProjectModal}
-              color="white"
               backgroundColor="#1976d2"
               icon={<MdAdd />}
             />
@@ -482,8 +488,8 @@ function EditProjects() {
 
                     <div className="flex space-x-2 mt-2">
                       {project.images.map((image, index) => (
-                        <>
-                          <div key={index} className="relative">
+                        <div key={index}>
+                          <div className="relative">
                             <img
                               src={image}
                               alt=""
@@ -504,9 +510,8 @@ function EditProjects() {
                               handleConfirmImageDelete(project._id)
                             }
                             deleteTitle="Image"
-                            key={index + image}
                           />
-                        </>
+                        </div>
                       ))}
 
                       <input
@@ -593,6 +598,7 @@ function EditProjects() {
         isOpen={isModalOpen}
         onClose={handleCloseAddProjectModal}
         onAddProject={handleAddProject}
+        isSaving={isNewProjectSaving}
       />
     </>
   );

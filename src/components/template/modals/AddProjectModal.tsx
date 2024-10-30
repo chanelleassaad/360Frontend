@@ -14,10 +14,12 @@ const AddProjectModal = ({
   isOpen,
   onClose,
   onAddProject,
+  isSaving,
 }: {
-  isOpen: any;
-  onClose: any;
-  onAddProject: any;
+  isOpen: boolean;
+  onClose: () => void;
+  onAddProject: (project: any) => Promise<void>;
+  isSaving: boolean;
 }) => {
   const [title, setTitle] = useState("");
   const [location, setLocation] = useState("");
@@ -30,19 +32,19 @@ const AddProjectModal = ({
   const currentYear = new Date().getFullYear();
   const years = Array.from({ length: 100 }, (_, i) => currentYear - i);
 
-  const handleImageUpload = (e: any) => {
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     setIsLoading(true);
-    const files = Array.from(e.target.files);
+    const files = Array.from(e.target.files || []);
     setImages(files as File[]);
     setTimeout(() => setIsLoading(false), 1000);
   };
 
-  const handleVideoUpload = (e: any) => {
-    const file = e.target.files[0];
+  const handleVideoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0] || null;
     setVideo(file);
   };
 
-  const handleSubmit = (e: any) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     // Check if required fields are filled
@@ -63,22 +65,25 @@ const AddProjectModal = ({
       video,
     };
 
-    onAddProject(newProject);
+    // Call onAddProject and wait for completion
+    await onAddProject(newProject);
 
-    setTitle("");
-    setLocation("");
-    setYear("");
-    setDescription("");
-    setImages([]);
-    setVideo(null);
-
-    onClose();
+    // Reset fields and close modal only if saving is complete
+    if (!isSaving) {
+      setTitle("");
+      setLocation("");
+      setYear("");
+      setDescription("");
+      setImages([]);
+      setVideo(null);
+      onClose();
+    }
   };
 
   return (
     <Modal
       open={isOpen}
-      onClose={onClose}
+      onClose={() => !isSaving && onClose()}
       aria-labelledby="add-project-modal"
       className="h-[100vh] flex items-center justify-center"
     >
@@ -88,7 +93,7 @@ const AddProjectModal = ({
             Add New Project
           </Typography>
           <button>
-            <MdClose onClick={() => onClose()} />
+            <MdClose onClick={() => !isSaving && onClose()} />
           </button>
         </div>
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -100,6 +105,7 @@ const AddProjectModal = ({
             required
             value={title}
             onChange={(e) => setTitle(e.target.value)}
+            disabled={isSaving}
           />
 
           <div className="flex justify-between">
@@ -111,6 +117,7 @@ const AddProjectModal = ({
               required
               value={location}
               onChange={(e) => setLocation(e.target.value)}
+              disabled={isSaving}
             />
 
             {/* Year */}
@@ -122,6 +129,7 @@ const AddProjectModal = ({
               required
               value={year}
               onChange={(e) => setYear(e.target.value)}
+              disabled={isSaving}
             >
               {years.map((year) => (
                 <MenuItem key={year} value={year}>
@@ -140,6 +148,7 @@ const AddProjectModal = ({
             rows={3}
             value={description}
             onChange={(e) => setDescription(e.target.value)}
+            disabled={isSaving}
           />
 
           <div className="md:flex block ">
@@ -155,6 +164,7 @@ const AddProjectModal = ({
                 onChange={handleImageUpload}
                 required
                 className="block w-full"
+                disabled={isSaving}
               />
               {isLoading ? (
                 <div className="flex items-center mt-2">
@@ -182,6 +192,7 @@ const AddProjectModal = ({
                 accept="video/*"
                 onChange={handleVideoUpload}
                 className="block w-full"
+                disabled={isSaving}
               />
               {video && <p className="mt-2 text-green-600">1 video uploaded</p>}
             </div>
@@ -189,8 +200,14 @@ const AddProjectModal = ({
 
           {/* Submit Button */}
           <div className="mt-4">
-            <Button type="submit" variant="contained" color="primary" fullWidth>
-              Add Project
+            <Button
+              type="submit"
+              variant="contained"
+              color="primary"
+              fullWidth
+              disabled={isSaving}
+            >
+              {isSaving ? "Adding Project..." : "Add Project"}
             </Button>
           </div>
         </form>

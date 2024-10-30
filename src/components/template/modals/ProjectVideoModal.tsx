@@ -14,11 +14,10 @@ const ProjectVideoModal = ({ project, isOpen, onClose }: any) => {
         className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"
       />
 
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-        <DialogPanel className="relative w-full h-full max-w-full max-h-full bg-black rounded-lg overflow-hidden">
-          {/* Fullscreen Video Player */}
-          <div className="flex h-full flex-col">
-            <div className="flex-shrink-0 p-4 bg-gray-800 text-white flex justify-between items-center">
+      <div className="fixed inset-0 z-50 flex items-center justify-center m-4">
+        <DialogPanel className="relative w-full h-full bg-black rounded-lg overflow-hidden">
+          <div className="flex flex-col h-full">
+            <div className="p-4 bg-gray-800 text-white flex justify-between items-center">
               <DialogTitle as="h3" className="text-lg font-semibold">
                 {project.title}
               </DialogTitle>
@@ -26,14 +25,12 @@ const ProjectVideoModal = ({ project, isOpen, onClose }: any) => {
                 <IoClose />
               </button>
             </div>
-            <div className="flex-grow flex items-center justify-center">
-              <iframe
-                className="w-full h-full object-cover"
-                src={project.video}
-                title="YouTube Video"
-                allowFullScreen
-              ></iframe>
-            </div>
+            <iframe
+              className=" !w-[100%] !h-[100%] !m-0"
+              src={project.video}
+              title="Project Video"
+              allowFullScreen
+            ></iframe>
           </div>
         </DialogPanel>
       </div>

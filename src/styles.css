@@ -4,6 +4,7 @@
 
 :root {
     --color-grey: #323a45;       
+    --color-grey-light: #323a45ad;
     --color-red: #f01632;      
     --color-light-red: #f6a9b7;  
   }
