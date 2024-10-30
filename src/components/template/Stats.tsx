@@ -13,6 +13,9 @@ export default function Stats() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [canEdit, setCanEdit] = useState(false);
   const { userToken } = useSelector((state: any) => state.auth);
+  const [errorMessage, setErrorMessage] = useState<string | undefined>(
+    undefined
+  );
 
   const handleEditStats = () => {
     setEditingStats([...stats]);
@@ -25,9 +28,7 @@ export default function Stats() {
     );
 
     if (hasMissingFields) {
-      alert(
-        "⚠️ Missing Fields\n\nPlease fill in all required fields (title and description)."
-      );
+      setErrorMessage("Fill in all required fields");
       return; // Stop further execution if there are missing fields
     }
     const newStats = editingStats.filter(
@@ -173,13 +174,17 @@ export default function Stats() {
         {/* Stat Editing Modal */}
         <EditModal
           isOpen={isModalOpen}
-          onClose={() => setIsModalOpen(false)}
+          onClose={() => {
+            setIsModalOpen(false);
+            setErrorMessage(undefined);
+          }}
           editingItems={editingStats}
           onSave={handleSaveStats}
           onDelete={handleDeleteStat}
           onAdd={handleAddStat}
           type="stats"
           onChange={handleStatChange}
+          errorMessage={errorMessage}
         />
       </div>
     </div>
