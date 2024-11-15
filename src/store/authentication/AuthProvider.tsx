@@ -11,7 +11,7 @@ import {
 export interface IUserToken {
   username: string;
   accessToken: string;
-  refreshToken: string;
+  // refreshToken: string;
 }
 
 const AuthProvider = ({ children }: { children: React.ReactNode }) => {
@@ -37,11 +37,11 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const authContext = useMemo(
     () => ({
       signIn: async (
-        username: string
-        // accessToken: string,
+        username: string,
+        accessToken: string
         // refreshToken: string
       ) => {
-        const token = { username };
+        const token = { username, accessToken };
         // const token = { email, accessToken, refreshToken };
         await secureLocalStorage.setItem("userToken", token); // Store token as a string
         dispatch(signIn(token));

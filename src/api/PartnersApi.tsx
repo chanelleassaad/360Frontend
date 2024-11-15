@@ -1,4 +1,4 @@
-import { api } from "./ProjectsApi";
+import { api } from "./AdminApi";
 
 // Get all partners
 export const getPartners = async () => {
@@ -12,12 +12,15 @@ export const getPartners = async () => {
 };
 
 // Add a new partner (with image upload)
-export const addPartner = async (partnerData: {
-  fullName: string | Blob;
-  quote: string | Blob;
-  description: string | Blob;
-  imageUrl: string | Blob;
-}) => {
+export const addPartner = async (
+  partnerData: {
+    fullName: string;
+    quote: string;
+    description: string;
+    imageUrl: string;
+  },
+  accessToken: string
+) => {
   try {
     // Use FormData to handle multipart/form-data request for image uploads
     const formData = new FormData();
@@ -28,7 +31,8 @@ export const addPartner = async (partnerData: {
 
     const response = await api.post("/partners/addPartner", formData, {
       headers: {
-        "Content-Type": "multipart/form-data", // Set the correct content type for file upload
+        "Content-Type": "multipart/form-data",
+        Authorization: `Bearer ${accessToken}`,
       },
     });
 
@@ -43,11 +47,12 @@ export const addPartner = async (partnerData: {
 export const editPartner = async (
   id: number,
   partnerData: {
-    fullName: string | Blob;
-    quote: string | Blob;
-    description: string | Blob;
-    imageUrl: string | Blob;
-  }
+    fullName: string;
+    quote: string;
+    description: string;
+    imageUrl: string;
+  },
+  accessToken: string
 ) => {
   try {
     const formData = new FormData();
@@ -61,6 +66,7 @@ export const editPartner = async (
     const response = await api.put(`/partners/editPartner/${id}`, formData, {
       headers: {
         "Content-Type": "multipart/form-data",
+        Authorization: `Bearer ${accessToken}`,
       },
     });
 
@@ -72,9 +78,13 @@ export const editPartner = async (
 };
 
 // Delete a partner by ID
-export const deletePartner = async (id: number) => {
+export const deletePartner = async (id: number, accessToken: string) => {
   try {
-    const response = await api.delete(`/partners/deletePartner/${id}`);
+    const response = await api.delete(`/partners/deletePartner/${id}`, {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    });
     return response.data; // Success message or relevant data
   } catch (error) {
     console.error("Error deleting partner:", error);

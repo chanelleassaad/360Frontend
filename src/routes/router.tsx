@@ -19,6 +19,8 @@ const Router = () => {
   useEffect(() => {
     if (isLoading) return;
 
+    console.log(userToken);
+
     // Allow access to the /admin route even when not logged in
     if (!userToken && location.pathname !== "/360-production/admin") {
       navigate("/360-production", { replace: true });

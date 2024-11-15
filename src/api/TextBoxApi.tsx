@@ -1,4 +1,4 @@
-import { api } from "./ProjectsApi";
+import { api } from "./AdminApi";
 
 export const getBoxDescription = async () => {
   try {
@@ -10,11 +10,15 @@ export const getBoxDescription = async () => {
   }
 };
 
-export const editBoxDescription = async (BoxData: { description: string }) => {
+export const editBoxDescription = async (
+  BoxData: { description: string },
+  accessToken: string
+) => {
   try {
     const response = await api.put(`/box/updateBoxDescription`, BoxData, {
       headers: {
         "Content-Type": "application/json",
+        Authorization: `Bearer ${accessToken}`,
       },
     });
 

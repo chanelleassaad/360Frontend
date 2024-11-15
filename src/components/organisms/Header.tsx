@@ -1,14 +1,12 @@
 import { useState } from "react";
 import { Dialog, DialogPanel } from "@headlessui/react";
-import { Bars3Icon, XMarkIcon } from "@heroicons/react/24/outline";
+import { Bars3Icon } from "@heroicons/react/24/outline"; // Importing close icon
 import logo from "../../assets/360logo.png";
-
-// Assuming you have an AuthContext to provide the user's authentication status
 import { useAuth } from "../../store/authentication/AuthContext";
 import { useSelector } from "react-redux";
 
 export default function Header() {
-  const { signOut } = useAuth(); // Use your AuthContext to get login status and logout function
+  const { signOut } = useAuth();
   const { userToken } = useSelector((state: any) => state.auth);
 
   const sections = [
@@ -24,16 +22,12 @@ export default function Header() {
     if (element) {
       const offset = element.offsetTop - 50;
       window.scrollTo({ behavior: "smooth", top: offset });
-      setMobileMenuOpen(false); // Close the mobile menu if it's open
+      setMobileMenuOpen(false);
     }
   };
 
   return (
-    <header
-      className={`bg-white inset-x-0 top-0 z-50 sticky ${
-        mobileMenuOpen ? "hidden" : "block"
-      }`}
-    >
+    <header className="bg-white inset-x-0 top-0 z-50 sticky">
       <nav
         aria-label="Global"
         className="mx-auto flex max-w-8xl items-center justify-between px-3 lg:px-8"
@@ -47,7 +41,7 @@ export default function Header() {
         <div className="flex lg:hidden">
           <button
             type="button"
-            onClick={() => setMobileMenuOpen(true)}
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             className="-m-2.5 inline-flex items-center justify-center rounded-md p-2.5 text-gray-700"
           >
             <span className="sr-only">Open main menu</span>
@@ -84,25 +78,14 @@ export default function Header() {
         onClose={() => setMobileMenuOpen(false)}
         className="lg:hidden"
       >
-        <div className="fixed inset-0 z-10 bg-black opacity-30" />
-        <DialogPanel className="fixed inset-y-0 right-0 z-10 w-full overflow-y-auto bg-white px-3 sm:max-w-sm sm:ring-1 sm:ring-gray-900/10">
-          <div className="flex items-center justify-between">
-            <img alt="360 Logo" src={logo} className="h-20 w-auto" />
-            <button
-              type="button"
-              onClick={() => setMobileMenuOpen(false)}
-              className="-m-2.5 rounded-md p-2.5 text-gray-700"
-            >
-              <span className="sr-only">Close menu</span>
-              <XMarkIcon aria-hidden="true" className="h-6 w-6" />
-            </button>
-          </div>
+        <div className="fixed inset-0 z-10 bg-black opacity-50" />
+        <DialogPanel className="fixed top-7 right-0 z-20 w-1/2 max-w-md bg-white shadow-lg transform transition-transform duration-300 ease-in-out">
 
           <div className="space-y-2 py-6">
             {sections.map((section) => (
               <button
                 key={section.id}
-                className="-mx-3 block rounded-lg px-3 py-2 text-base font-semibold leading-7 text-gray-900 hover:bg-gray-50"
+                className="block w-full rounded-lg px-3 py-2 text-base font-semibold leading-7 text-gray-900 hover:bg-gray-50"
                 onClick={() => handleNavigation(section.id)}
               >
                 {section.name}
@@ -112,7 +95,7 @@ export default function Header() {
             {userToken && (
               <button
                 onClick={signOut}
-                className="-mx-3 block rounded-lg px-3 py-2 text-base font-semibold leading-7 text-gray-900 hover:bg-gray-50"
+                className="block w-full rounded-lg px-3 py-2 text-base font-semibold leading-7 text-gray-900 hover:bg-gray-50"
               >
                 Logout
               </button>

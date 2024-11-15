@@ -1,7 +1,7 @@
 import { AtSymbolIcon, PhoneIcon } from "@heroicons/react/24/outline";
 import { useRef } from "react";
 import image from "../assets/360logo.png";
-import { api } from "../api/ProjectsApi";
+import { sendEmailApi } from "../api/EmailApi";
 
 const features = [
   {
@@ -36,31 +36,35 @@ export default function ContactUs() {
   };
 
   const sendEmail = async (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();  // Prevent form from reloading the page
-  
+    event.preventDefault(); // Prevent form from reloading the page
+
     if (!formRef.current) {
       console.error("Form reference is null.");
       return;
     }
-  
+
     // Collect form data using querySelector
-    const name = formRef.current.querySelector<HTMLInputElement>("#first-name")?.value;
-    const email = formRef.current.querySelector<HTMLInputElement>("#email")?.value;
-    const subject = formRef.current.querySelector<HTMLInputElement>("#subject")?.value;
-    const message = formRef.current.querySelector<HTMLTextAreaElement>("#message")?.value;
-  
+    const name =
+      formRef.current.querySelector<HTMLInputElement>("#first-name")?.value;
+    const email =
+      formRef.current.querySelector<HTMLInputElement>("#email")?.value;
+    const subject =
+      formRef.current.querySelector<HTMLInputElement>("#subject")?.value;
+    const message =
+      formRef.current.querySelector<HTMLTextAreaElement>("#message")?.value;
+
     const data = {
-      name: name || "",  // fallback to an empty string if the field is empty
+      name: name || "", // fallback to an empty string if the field is empty
       email: email || "",
       subject: subject || "",
       message: message || "",
     };
-  
+
     try {
-      const response = await api.post("/email/send-email", data);  // Correct method is POST
+      await sendEmailApi(data); // Correct method is POST
       console.log("Email successfully sent");
       alert("Email sent successfully!");
-      handleReset();  // Reset the form if email is sent successfully
+      handleReset(); // Reset the form if email is sent successfully
     } catch (error) {
       console.error("Error sending email:", error);
       alert("Error occurred while sending the email.");

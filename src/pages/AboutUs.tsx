@@ -52,7 +52,7 @@ function AboutUs() {
 
   const handleSaveText = async () => {
     try {
-      await editBoxDescription({ description: text });
+      await editBoxDescription({ description: text }, userToken.accessToken);
       setIsEditing(false); // Exit editing mode
     } catch (error) {
       console.error("Error saving description:", error);
@@ -106,30 +106,39 @@ function AboutUs() {
       // Handle new partners (batch add)
       const addedPartners = await Promise.all(
         newPartners.map((partner) =>
-          addPartner({
-            fullName: partner.fullName,
-            description: partner.description,
-            quote: partner.quote,
-            imageUrl: partner.imageUrl, // Ensure all necessary fields are passed
-          })
+          addPartner(
+            {
+              fullName: partner.fullName,
+              description: partner.description,
+              quote: partner.quote,
+              imageUrl: partner.imageUrl, // Ensure all necessary fields are passed
+            },
+            userToken.accessToken
+          )
         )
       );
 
       // Handle updated partners (batch update)
       const updatedExistingPartners = await Promise.all(
         updatedPartners.map((partner) =>
-          editPartner(partner._id, {
-            fullName: partner.fullName,
-            description: partner.description,
-            quote: partner.quote,
-            imageUrl: partner.imageUrl, // Ensure all necessary fields are passed
-          })
+          editPartner(
+            partner._id,
+            {
+              fullName: partner.fullName,
+              description: partner.description,
+              quote: partner.quote,
+              imageUrl: partner.imageUrl, // Ensure all necessary fields are passed
+            },
+            userToken.accessToken
+          )
         )
       );
 
       // Handle deleted partners (batch delete)
       await Promise.all(
-        deletedPartnerIds.map((partnerId) => deletePartner(partnerId))
+        deletedPartnerIds.map((partnerId) =>
+          deletePartner(partnerId, userToken.accessToken)
+        )
       );
 
       // Update state with new and edited partners after all API calls are complete

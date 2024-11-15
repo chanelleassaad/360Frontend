@@ -29,6 +29,7 @@ import { useNavigate } from "react-router-dom";
 import ReButton from "../molecules/ReButton";
 import AddProjectModal from "./modals/AddProjectModal";
 import DeleteModal from "./modals/DeleteModal";
+import { useSelector } from "react-redux";
 
 function EditProjects() {
   const [projects, setProjects] = useState<IProject[]>([]);
@@ -49,6 +50,8 @@ function EditProjects() {
   const [projectToDelete, setProjectToDelete] = useState<any>(null);
 
   const [isNewProjectSaving, setIsNewProjectSaving] = useState(false);
+
+  const { userToken } = useSelector((state: any) => state.auth);
 
   const navigate = useNavigate();
 
@@ -124,21 +127,22 @@ function EditProjects() {
           project.title,
           project.location,
           project.year,
-          project.description
+          project.description,
+          userToken.accessToken
         );
       }
 
       if (changedSections.images && imagesToDelete.length > 0) {
-        await deleteImages(project._id, imagesToDelete);
+        await deleteImages(project._id, imagesToDelete, userToken.accessToken);
       }
       if (changedSections.images && imagesToAdd.length > 0) {
-        await addImages(project._id, imagesToAdd);
+        await addImages(project._id, imagesToAdd, userToken.accessToken);
       }
 
       if (changedSections.video) {
         if (project.video === null) {
           // Delete the video if it's flagged for deletion
-          await deleteVideo(project._id);
+          await deleteVideo(project._id, userToken.accessToken);
         } else if (
           typeof project.video === "string" &&
           project.video.startsWith("blob:")
@@ -151,7 +155,7 @@ function EditProjects() {
             project.videoName || "default_name.mp4",
             { type: videoBlob.type }
           );
-          await uploadVideo(project._id, videoFile);
+          await uploadVideo(project._id, videoFile, userToken.accessToken);
         }
       }
 
@@ -176,7 +180,8 @@ function EditProjects() {
 
   const handleDeleteProject = async () => {
     try {
-      if (projectToDelete) await deleteProject(projectToDelete._id);
+      if (projectToDelete)
+        await deleteProject(projectToDelete._id, userToken.accessToken);
       const updatedProjects = await getProjects(); // Fetch updated data
       setProjects(updatedProjects); // Update frontend state
       setIsProjectDeleteModalOpen(false);
@@ -211,7 +216,8 @@ function EditProjects() {
         newProjectData.year,
         newProjectData.description,
         newProjectData.video,
-        newProjectData.images
+        newProjectData.images,
+        userToken.accessToken
       );
 
       setProjects((prevProjects) => [...prevProjects, resp]);

@@ -1,4 +1,4 @@
-import { api } from "./ProjectsApi";
+import { api } from "./AdminApi";
 
 // Get stats
 export const getStats = async () => {
@@ -7,19 +7,35 @@ export const getStats = async () => {
 };
 
 // Add stat
-export const addStat = async (statData: any) => {
-  const response = await api.post(`/stats/addStats`, statData);
+export const addStat = async (statData: any, accessToken: string) => {
+  const response = await api.post(`/stats/addStats`, statData, {
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+    },
+  });
   return response.data;
 };
 
 // Delete stat
-export const deleteStat = async (statId: number) => {
-  const response = await api.delete(`/stats/deleteStat/${statId}`);
+export const deleteStat = async (statId: number, accessToken: string) => {
+  const response = await api.delete(`/stats/deleteStat/${statId}`, {
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+    },
+  });
   return response.data;
 };
 
 // Edit stat
-export const editStat = async (statId: number, updatedStatData: any) => {
-  const response = await api.put(`/stats/editStat/${statId}`, updatedStatData);
+export const editStat = async (
+  statId: number,
+  updatedStatData: any,
+  accessToken: string
+) => {
+  const response = await api.put(`/stats/editStat/${statId}`, updatedStatData, {
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+    },
+  });
   return response.data;
 };

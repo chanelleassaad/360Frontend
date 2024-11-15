@@ -54,22 +54,33 @@ export default function Stats() {
       // Handle new stats (batch add)
       const addedStats = await Promise.all(
         newStats.map((stat) =>
-          addStat({ title: stat.title, description: stat.description })
+          addStat(
+            { title: stat.title, description: stat.description },
+            userToken.accessToken
+          )
         )
       );
 
       // Handle edited stats (batch update)
       const updatedExistingStats = await Promise.all(
         updatedStats.map((stat) =>
-          editStat(stat._id, {
-            title: stat.title,
-            description: stat.description,
-          })
+          editStat(
+            stat._id,
+            {
+              title: stat.title,
+              description: stat.description,
+            },
+            userToken.accessToken
+          )
         )
       );
 
       // Handle deleted stats (batch delete)
-      await Promise.all(deletedStatIds.map((statId) => deleteStat(statId)));
+      await Promise.all(
+        deletedStatIds.map((statId) =>
+          deleteStat(statId, userToken.accessToken)
+        )
+      );
 
       // Update the state only once after all API calls are complete
       setStats(() => {

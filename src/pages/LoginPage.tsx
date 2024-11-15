@@ -22,8 +22,8 @@ export default function Login() {
     };
 
     try {
-      await loginUser(userData);
-      await signIn(userData.username);
+      const res = await loginUser(userData);
+      await signIn(userData.username, res.accessToken);
       setErrorMessage("");
       navigate("/");
     } catch (error) {

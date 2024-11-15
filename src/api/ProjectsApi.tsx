@@ -1,26 +1,30 @@
-import axios from "axios";
-
-export const api = axios.create({
-  baseURL: process.env.REACT_APP_API_URL,
-});
+import { api } from "./AdminApi";
 
 export const getProjects = async () => {
   const response = await api.get(`/projects/getProjects`);
   return response.data;
 };
 
-export const deleteProject = async (id: string) => {
+export const deleteProject = async (id: string, accessToken: string) => {
   try {
-    const response = await api.delete(`/projects/deleteProject/${id}`);
+    const response = await api.delete(`/projects/deleteProject/${id}`, {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    });
     return response.data;
   } catch (error) {
     // throw new Error(error.response?.data?.message || 'Error deleting project');
   }
 };
 
-export const deleteVideo = async (projectId: string) => {
+export const deleteVideo = async (projectId: string, accessToken: string) => {
   try {
-    const response = await api.delete(`/projects/deleteVideo/${projectId}`);
+    const response = await api.delete(`/projects/deleteVideo/${projectId}`, {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    });
     return response.data;
   } catch (error) {
     console.error("Error deleting video:", error);
@@ -28,7 +32,11 @@ export const deleteVideo = async (projectId: string) => {
   }
 };
 
-export const uploadVideo = async (projectId: string, videoFile: File) => {
+export const uploadVideo = async (
+  projectId: string,
+  videoFile: File,
+  accessToken: string
+) => {
   const formData = new FormData();
   formData.append("video", videoFile);
   try {
@@ -38,6 +46,7 @@ export const uploadVideo = async (projectId: string, videoFile: File) => {
       {
         headers: {
           "Content-Type": "multipart/form-data",
+          Authorization: `Bearer ${accessToken}`,
         },
       }
     );
@@ -53,15 +62,24 @@ export const editProjectData = async (
   title: string,
   location: string,
   year: number,
-  description: string
+  description: string,
+  accessToken: string
 ) => {
   try {
-    const response = await api.put(`/projects/editProjectData/${id}`, {
-      title,
-      location,
-      year,
-      description,
-    });
+    const response = await api.put(
+      `/projects/editProjectData/${id}`,
+      {
+        title,
+        location,
+        year,
+        description,
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      }
+    );
     return response.data;
   } catch (error) {
     console.error("Error updating project data:", error);
@@ -69,7 +87,11 @@ export const editProjectData = async (
   }
 };
 
-export const addImages = async (projectId: string, imageFiles: any[]) => {
+export const addImages = async (
+  projectId: string,
+  imageFiles: any[],
+  accessToken: string
+) => {
   const formData = new FormData();
   Array.from(imageFiles).forEach((file) => {
     formData.append("images", file); // Append each image to the FormData object
@@ -82,6 +104,7 @@ export const addImages = async (projectId: string, imageFiles: any[]) => {
       {
         headers: {
           "Content-Type": "multipart/form-data",
+          Authorization: `Bearer ${accessToken}`,
         },
       }
     );
@@ -92,9 +115,17 @@ export const addImages = async (projectId: string, imageFiles: any[]) => {
   }
 };
 
-export const deleteImages = async (projectId: string, imageNames: string[]) => {
+export const deleteImages = async (
+  projectId: string,
+  imageNames: string[],
+  accessToken: string
+) => {
   try {
     const response = await api.delete(`/projects/deleteImages/${projectId}`, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+        Authorization: `Bearer ${accessToken}`,
+      },
       params: {
         imageNames, // Pass imageNames as query parameters
       },
@@ -112,7 +143,8 @@ export const addProject = async (
   year: number,
   description: string,
   video: File,
-  images: FileList
+  images: FileList,
+  accessToken: string
 ) => {
   try {
     const formData = new FormData();
